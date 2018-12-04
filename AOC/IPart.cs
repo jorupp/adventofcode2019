@@ -18,15 +18,16 @@ namespace AoC
 
         protected void RunScenario(string name, Action run)
         {
+            var dayPart = this.GetType().Namespace.Split('.').Last() + "-" + this.GetType().Name;
             var sw = Stopwatch.StartNew();
             try
             {
                 run();
-                Console.WriteLine($"{name} completed in {sw.Elapsed}");
+                Console.WriteLine($"{dayPart}-{name} completed in {sw.Elapsed}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{name} failed in {sw.Elapsed}: {ex}");
+                Console.WriteLine($"{dayPart}-{name} failed in {sw.Elapsed}: {ex}");
             }
         }
 

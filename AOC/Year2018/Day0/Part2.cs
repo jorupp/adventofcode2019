@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AoC.Year2018.Day0
 {

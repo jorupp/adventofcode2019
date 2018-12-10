@@ -43,6 +43,7 @@ namespace AoC.Year2018.Day9
                 }
 
                 Console.WriteLine(scores.Max());
+                Console.WriteLine($"{GC.GetTotalMemory(true):n0} {circle.Count}");
             });
         }
 

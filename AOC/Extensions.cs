@@ -21,7 +21,7 @@ namespace AoC
             }
         }
 
-        private static Regex NumberRegex = new Regex(@"(\d+)", RegexOptions.Compiled);
+        private static Regex NumberRegex = new Regex(@"([0-9-+]+)", RegexOptions.Compiled);
         public static int[] Numbers(this string input)
         {
             return NumberRegex.Matches(input).Select(i => i.Captures[0].Value).Select(int.Parse).ToArray();

@@ -10,4 +10,10 @@
     <PackageReference Include="OptimizedPriorityQueue" Version="4.2.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="System.Private.Xml">
+      <HintPath>..\..\..\Program Files\dotnet\shared\Microsoft.NETCore.App\2.1.0\System.Private.Xml.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

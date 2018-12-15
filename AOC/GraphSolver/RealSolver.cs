@@ -7,9 +7,9 @@ using Priority_Queue;
 
 namespace AoC.GraphSolver
 {
-    public class RealSolver : ISolver
+    public class RealSolver
     {
-        public TNode Evaluate<TNode, TKey>(TNode start, TKey key) where TNode : Node<TNode, TKey>
+        public TNode Evaluate<TNode, TKey>(TNode start, TKey key, Func<TNode, TNode, bool> isBetter) where TNode : Node<TNode, TKey>
         {
             TNode bestComplete = null;
             var bestNodes = new Dictionary<TKey, TNode>();
@@ -25,14 +25,19 @@ namespace AoC.GraphSolver
                 {
                     //var x = bestNodes.Select(n => new { node = n.Value, next = n.Value.GetAdjacent().ToArray() })
                     //    .ToArray();
-                    var bestLeft = bestNodes.Values.OrderBy(i => i.CurrentCost).First();
-                    Console.WriteLine("Best of the rest....");
-                    return bestLeft;
+                    return bestComplete;
+                    //if (null != bestComplete)
+                    //{
+                    //    return bestComplete;
+                    //}
+                    //var bestLeft = bestNodes.Values.OrderBy(i => i.CurrentCost).First();
+                    //Console.WriteLine("Best of the rest....");
+                    //return bestLeft;
 
                 }
                 var workKey = toEvaluate.Dequeue();
                 var work = bestNodes[workKey];
-                if (bestComplete != null && bestComplete.CurrentCost <= work.EstimatedCost)
+                if (bestComplete != null && bestComplete.CurrentCost < work.EstimatedCost)
                 {
                     return bestComplete;
                 }
@@ -45,7 +50,7 @@ namespace AoC.GraphSolver
                     }
                     if (next.IsComplete)
                     {
-                        if (null == bestComplete || next.CurrentCost < bestComplete.CurrentCost)
+                        if (null == bestComplete || next.CurrentCost < bestComplete.CurrentCost || (next.CurrentCost == bestComplete.CurrentCost && isBetter(next, bestComplete)))
                         {
                             // new best - remember it
                             bestComplete = next;
@@ -56,7 +61,7 @@ namespace AoC.GraphSolver
                     if (bestNodes.TryGetValue(next.Key, out var existing))
                     {
                         // we've already seen this node - update the cost if better, but no need to process further
-                        if (next.CurrentCost < existing.CurrentCost)
+                        if (next.CurrentCost < existing.CurrentCost || (next.CurrentCost == existing.CurrentCost && isBetter(next, existing)))
                         {
                             bestNodes[next.Key] = next;
                             toEvaluate.TryUpdatePriority(next.Key, next.EstimatedCost);

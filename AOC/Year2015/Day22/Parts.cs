@@ -8,7 +8,7 @@ namespace AoC.Year2015.Day22
         protected void RunScenario(string name, GameNode initialState)
         {
             RunScenario($"{name} - simple", new SimpleSolver(), initialState);
-            //RunScenario($"{name} - real", new RealSolver(), initialState);
+            RunScenario($"{name} - real", new OriginalRealSolver(), initialState);
         }
 
         private void RunScenario(string name, ISolver solver, GameNode initialState)

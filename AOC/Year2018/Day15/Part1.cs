@@ -27,34 +27,7 @@ namespace AoC.Year2018.Day15
                 var round = 0;
                 for (;; round++)
                 {
-                    //Console.WriteLine($"{round} rounds complete");
-
-                    //var sb = new StringBuilder();
-                    //for (var y = 0; y < walls.Length; y++)
-                    //{
-                    //    var linePlayers = new List<Player>();
-                    //    for (var x = 0; x < walls[0].Length; x++)
-                    //    {
-                    //        var player = players.FirstOrDefault(i => i.IsAlive && i.X == x && i.Y == y);
-                    //        if (null == player)
-                    //        {
-                    //            sb.Append(walls[y][x] ? 'X' : '.');
-                    //        }
-                    //        else
-                    //        {
-                    //            sb.Append(player.IsElf ? 'E' : 'G');
-                    //            linePlayers.Add(player);
-                    //        }
-                    //    }
-
-                    //    foreach (var player in linePlayers)
-                    //    {
-                    //        sb.Append($"  {(player.IsElf ? 'E' : 'G')}({player.HP})");
-                    //    }
-                    //    sb.AppendLine();
-                    //}
-                    //Console.WriteLine(sb.ToString());
-
+                    //DumpStatus(players, walls, round);
 
                     var toPlay = players.OrderBy(i => i.Y).ThenBy(i => i.X).ToList();
                     //Console.WriteLine($"    {toPlay.Count} alive");
@@ -74,17 +47,21 @@ namespace AoC.Year2018.Day15
                         if (!moveTargets.Any(i => i.X == player.X && i.Y == player.Y) && moveTargets.Any())
                         {
                             // we move first
-                            var paths = moveTargets.Select(i => GetPath(player, i, noMove)).Where(i => i != null).ToList();
-                            if (paths.Any(i => i.Length == 0))
+                            var paths = moveTargets.AsParallel().Select(i => new
+                            {
+                                target = i,
+                                path = GetPath(player, i, noMove)
+                            }).Where(i => i.path != null).ToList();
+
+                            var orderedPaths = paths.OrderBy(i => i.path.Length).ThenBy(i => i.target.Y).ThenBy(i => i.target.X).ThenBy(i => i.path[0].Y).ThenBy(i => i.path[0].X).ToList();
+                           
+                            var path = orderedPaths.FirstOrDefault()?.path;
+
+                            if (player.X == 22 && player.Y == 12)
                             {
 
                             }
-                            var orderedPaths = paths.OrderBy(i => i.Length).ThenBy(i => i[0].Y).ThenBy(i => i[0].X).ToList();
-                            if (round == 0 && player.Y == 1 && player.X == 4)
-                            {
 
-                            }
-                            var path = orderedPaths.FirstOrDefault();
                             if (null != path)
                             {
                                 player.X = path[0].X;
@@ -109,10 +86,50 @@ namespace AoC.Year2018.Day15
                 var hp = players.Where(i => i.IsAlive).Sum(i => i.HP);
                 var result = round * hp;
 
+                //Console.WriteLine("Done");
+                //DumpStatus(players, walls, round);
+
                 Console.WriteLine($"{round},{hp},{result}");
             });
         }
 
+        private static void DumpStatus(Player[] players, bool[][] walls, int round)
+        {
+            var hp = players.Where(i => i.IsAlive).Sum(i => i.HP);
+            var result = round * hp;
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"{round} * {hp} = {result}");
+            for (var y = 0; y < walls.Length; y++)
+            {
+                var linePlayers = new List<Player>();
+                for (var x = 0; x < walls[0].Length; x++)
+                {
+                    var player = players.FirstOrDefault(i => i.IsAlive && i.X == x && i.Y == y);
+                    if (null == player)
+                    {
+                        sb.Append(walls[y][x] ? '#' : '.');
+                    }
+                    else
+                    {
+                        sb.Append(player.IsElf ? 'E' : 'G');
+                        linePlayers.Add(player);
+                    }
+                }
+
+                sb.Append(" ");
+
+                foreach (var player in linePlayers)
+                {
+                    sb.Append($" {(player.IsElf ? 'E' : 'G')}({player.HP})");
+                }
+
+                sb.AppendLine();
+            }
+            sb.AppendLine();
+
+            Console.WriteLine(sb.ToString());
+        }
         private bool IsBefore(Location l1, Location l2)
         {
             if (l1.Y < l2.Y)
@@ -253,7 +270,7 @@ namespace AoC.Year2018.Day15
 #.....#
 #######");
 
-            RunScenario("part1", @"#######
+            RunScenario("initial", @"#######
 #G..#E#
 #E#E.E#
 #G.##.#
@@ -262,7 +279,7 @@ namespace AoC.Year2018.Day15
 #######
 ");
 
-            RunScenario("part1", @"#######
+            RunScenario("initial", @"#######
 #E..EG#
 #.#G.E#
 #E.##E#
@@ -271,7 +288,7 @@ namespace AoC.Year2018.Day15
 #######
 ");
 
-            RunScenario("part1", @"#######
+            RunScenario("initial", @"#######
 #E.G#.#
 #.#G..#
 #G.#.G#
@@ -280,7 +297,7 @@ namespace AoC.Year2018.Day15
 #######
 ");
 
-            RunScenario("part1", @"#######
+            RunScenario("initial", @"#######
 #.E...#
 #.#..G#
 #.###.#
@@ -289,7 +306,7 @@ namespace AoC.Year2018.Day15
 #######
 ");
 
-            RunScenario("part1", @"#########
+            RunScenario("initial", @"#########
 #G......#
 #.E.#...#
 #..##..G#
@@ -300,7 +317,39 @@ namespace AoC.Year2018.Day15
 #########
 ");
 
-            //return;
+            RunScenario("sean", @"################################
+#######.G...####################
+#########...####################
+#########.G.####################
+#########.######################
+#########.######################
+#########G######################
+#########.#...##################
+#########.....#..###############
+########...G....###.....########
+#######............G....########
+#######G....G.....G....#########
+######..G.....#####..G...#######
+######...G...#######......######
+#####.......#########....G..E###
+#####.####..#########G...#....##
+####..####..#########..G....E..#
+#####.####G.#########...E...E.##
+#########.E.#########.........##
+#####........#######.E........##
+######........#####...##...#..##
+###...................####.##.##
+###.............#########..#####
+#G#.#.....E.....#########..#####
+#...#...#......##########.######
+#.G............#########.E#E####
+#..............##########...####
+##..#..........##########.E#####
+#..#G..G......###########.######
+#.G.#..........#################
+#...#..#.......#################
+################################");
+
             RunScenario("part1", @"################################
 #######..G######################
 ########.....###################

@@ -5,15 +5,14 @@ using System.Linq;
 
 namespace AoC.Year2018.Day16
 {
-    public class Part1 : BasePart
+    public class Part2b : BasePart
     {
         protected void RunScenario(string title, string input)
         {
             RunScenario(title, () =>
             {
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                var commands = new[] { "addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bori", "setr", "seti", "gtir", "gtri", "gtrr", "eqir", "eqri", "eqrr" };
-                var possible = Enumerable.Range(0, 16).Select(i => Enumerable.Repeat(true, 16).ToArray()).ToArray();
+                var mapping = new[] { "gtrr", "borr", "gtir", "eqri", "addr", "seti", "eqrr", "gtri", "banr", "addi", "setr", "mulr", "bori", "muli", "eqir", "bani" };
 
                 var have3OrMore = 0;
                 var inputs = GetInputs(lines).ToArray();
@@ -22,20 +21,18 @@ namespace AoC.Year2018.Day16
                     var start = inp[0].Numbers();
                     var command = inp[1].Numbers();
                     var commandNumber = command[0];
+                    var commandName = mapping[commandNumber];
                     var args = command.Skip(1).ToArray();
                     var end = inp[2].Numbers();
 
-                    var q = (from c in commands.Select((i, ix) => new { i, ix })
-                        let output = Execute(start, c.i, args)
-                        where AreEqual(end, output)
-                        select c.ix).ToArray();
-                    if (q.Length >= 3)
+
+                    var result = Execute(start, commandName, args);
+                    if (!AreEqual(result, end))
                     {
-                        have3OrMore++;
+                        Console.WriteLine("broken");
                     }
                 }
 
-                Console.WriteLine(have3OrMore);
             });
         }
 
@@ -156,10 +153,6 @@ namespace AoC.Year2018.Day16
 
         public override void Run()
         {
-            RunScenario("initial", @"Before: [3, 2, 1, 1]
-9 2 1 2
-After:  [3, 2, 2, 1]");
-            //return;
             RunScenario("part1", @"Before: [1, 3, 2, 2]
 6 2 3 2
 After:  [1, 3, 1, 2]

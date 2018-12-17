@@ -2,20 +2,20 @@
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
+using System.Text;
 
 namespace AoC.Year2018.Day16
 {
-    public class Part1 : BasePart
+    public class Part2a : BasePart
     {
+        private static readonly string[] commands = new[] { "addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bori", "setr", "seti", "gtir", "gtri", "gtrr", "eqir", "eqri", "eqrr" };
         protected void RunScenario(string title, string input)
         {
             RunScenario(title, () =>
             {
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-                var commands = new[] { "addr", "addi", "mulr", "muli", "banr", "bani", "borr", "bori", "setr", "seti", "gtir", "gtri", "gtrr", "eqir", "eqri", "eqrr" };
                 var possible = Enumerable.Range(0, 16).Select(i => Enumerable.Repeat(true, 16).ToArray()).ToArray();
 
-                var have3OrMore = 0;
                 var inputs = GetInputs(lines).ToArray();
                 foreach (var inp in inputs)
                 {
@@ -27,16 +27,91 @@ namespace AoC.Year2018.Day16
 
                     var q = (from c in commands.Select((i, ix) => new { i, ix })
                         let output = Execute(start, c.i, args)
-                        where AreEqual(end, output)
+                        where !AreEqual(end, output)
                         select c.ix).ToArray();
-                    if (q.Length >= 3)
+                    foreach (var i in q)
                     {
-                        have3OrMore++;
+                        possible[i][commandNumber] = false;
                     }
                 }
 
-                Console.WriteLine(have3OrMore);
+                DumpState(possible);
+
+                for (var z = 0; z < 32; z++)
+                {
+                    for (var x = 0; x < 16; x++)
+                    {
+                        var row = possible[x];
+                        var rowSet = row.Select((i, ix) => new {i, ix}).Where(i => i.i).ToArray();
+                        if (rowSet.Length == 1)
+                        {
+                            for (var y = 0; y < 16; y++)
+                            {
+                                if (y == x)
+                                    continue;
+                                possible[y][rowSet[0].ix] = false;
+                            }
+                        }
+
+                        var col = possible.Select(i => i[x]).ToArray();
+                        var colSet = col.Select((i, ix) => new {i, ix}).Where(i => i.i).ToArray();
+                        if (colSet.Length == 1)
+                        {
+                            for (var y = 0; y < 16; y++)
+                            {
+                                if (y == x)
+                                    continue;
+                                possible[colSet[0].ix][y] = false;
+                            }
+                        }
+                    }
+                }
+
+                DumpState(possible);
+                DumpMap(possible);
             });
+        }
+
+        private void DumpMap(bool[][] possible)
+        {
+            var sb = new StringBuilder();
+            for (var x = 0; x < 16; x++)
+            {
+                for (var y = 0; y < 16; y++)
+                {
+                    if (possible[y][x])
+                    {
+                        sb.AppendLine(commands[y]);
+                    }
+                }
+
+                sb.AppendLine();
+            }
+            Console.WriteLine(sb.ToString());
+        }
+
+        private void DumpState(bool[][] possible)
+        {
+            var sb = new StringBuilder();
+
+            for (var y = 0; y < 16; y++)
+            {
+                sb.Append(y.ToString().PadLeft(2, ' '));
+            }
+
+            sb.AppendLine();
+            for (var x = 0; x < 16; x++)
+            {
+                for (var y = 0; y < 16; y++)
+                {
+                    sb.Append(possible[x][y] ? "X " : ". ");
+                }
+
+                sb.Append("  ");
+                sb.Append(commands[x]);
+                sb.AppendLine();
+            }
+            Console.WriteLine(sb.ToString());
         }
 
         private IEnumerable<string[]> GetInputs(string[] lines)
@@ -156,9 +231,6 @@ namespace AoC.Year2018.Day16
 
         public override void Run()
         {
-            RunScenario("initial", @"Before: [3, 2, 1, 1]
-9 2 1 2
-After:  [3, 2, 2, 1]");
             //return;
             RunScenario("part1", @"Before: [1, 3, 2, 2]
 6 2 3 2

@@ -66,7 +66,11 @@ namespace AoC
             //new Year2018.Day16.Part2b().Run();
             //new Year2018.Day16.Part2().Run();
 
-            new Year2018.Day17.Part1().Run();
+            //new Year2018.Day17.Part1().Run();
+
+            new Year2018.Day18.Part1().Run();
+            new Year2018.Day18.Part2().Run();
+
 
             if (Debugger.IsAttached)
             {

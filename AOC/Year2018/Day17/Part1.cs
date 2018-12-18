@@ -296,7 +296,18 @@ y=4, x=502..506
 x=498, y=10..13
 x=504, y=10..13
 y=13, x=498..504");
-            //            return;
+            RunScenario("paul's scenario", @"x=498, y=2..4
+x=502, y=2..4
+y=5, x=499..499
+y=5, x=501..501
+y=6, x=500..500");
+            RunScenario("alternate based on paul's scenario", @"x=498, y=2..4
+x=502, y=2..4
+y=5, x=499..499
+y=5, x=501..501
+y=6, x=500..500
+y=1, x=508..508");
+            //return;
             RunScenario("part1", @"x=565, y=1098..1105
 y=102, x=439..459
 x=519, y=1522..1532

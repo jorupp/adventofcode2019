@@ -9,45 +9,31 @@ namespace AoC.Year2018.Day19
         {
             RunScenario(title, () =>
             {
-                int r0 = 0, r1 = 10551300, r2 = 10550400, r3 = 3, r4 = 1, r5 = 1;
-                goto s_3;
+                int r0 = 0, r1 = 10551300;
+                var r5 = 1;
+                do
+                {
+                    //// number 1 to r1, if r5 * r4 = r1, add r5 to r0
+                    //for(var r4 = 1; r4 <= r1; r4++)
+                    //{
+                    //    if (r5 * r4 == r1)
+                    //    {
+                    //        r0 += r5;
+                    //    }
+                    //}
 
-                s_1:
-                r5 = 1;
-                s_2:
-                r4 = 1;
-                s_3:
-                r2 = r5 * r4;
-                s_4:
-                if (r2 == r1)
-                {
-                    goto s_7;
-                }
-                else
-                {
-                    goto s_8;
-                }
-                s_7:
-                r0 += 5;
-                s_8:
-                r4++;
-                s_9:
-                if (r4 > r1)
-                {
-                    goto s_12;
-                }
-                else
-                {
-                    goto s_3;
-                }
-                s_12:
-                r5++;
-                if (r5 > r1)
-                {
-                    Console.WriteLine(r0);
-                    return;
-                }
-                goto s_1;
+                    if (r1 % r5 == 0)
+                    {
+                        r0 += r5;
+                    }
+
+                    r5++;
+                    if (r5 > r1)
+                    {
+                        Console.WriteLine(r0);
+                        return;
+                    }
+                } while (r5 <= r1);
             });
         }
 

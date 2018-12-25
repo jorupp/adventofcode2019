@@ -84,7 +84,9 @@ namespace AoC
             //new Year2018.Day23.Part2().Run();
 
             //new Year2018.Day24.Part1().Run();
-            new Year2018.Day24.Part2().Run();
+            //new Year2018.Day24.Part2().Run();
+            
+            new Year2018.Day25.Part1().Run();
 
             if (Debugger.IsAttached)
             {

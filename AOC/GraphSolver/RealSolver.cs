@@ -9,15 +9,36 @@ namespace AoC.GraphSolver
 {
     public class RealSolver
     {
-        public TNode Evaluate<TNode, TKey, TCost>(TNode start, Func<TNode, TNode, bool> isBetter) where TNode : Node<TNode, TKey, TCost> where TCost : IComparable<TCost>
+        public TNode Evaluate<TNode, TKey, TCost>(TNode start, Func<TNode, TNode, bool> isBetter = null) where TNode : Node<TNode, TKey, TCost> where TCost : IComparable<TCost>
         {
+            return Evaluate<TNode, TKey, TCost>(new[] {start}, isBetter);
+        }
+
+        public TNode Evaluate<TNode, TKey, TCost>(TNode[] startNodes, Func<TNode, TNode, bool> isBetter = null, Action<TNode> evaluateNode = null, Action<Dictionary<TKey, TNode>, SimplePriorityQueue<TKey, TCost>, HashSet<TKey>> whenDone = null) where TNode : Node<TNode, TKey, TCost> where TCost : IComparable<TCost>
+        {
+            if (null == isBetter)
+            {
+                isBetter = (i1, i2) => false;
+            }
+            if (null == evaluateNode)
+            {
+                evaluateNode = i => { };
+            }
+            if (null == whenDone)
+            {
+                whenDone = (a, b, c) => { };
+            }
+
             TNode bestComplete = null;
             var bestNodes = new Dictionary<TKey, TNode>();
             var toEvaluate = new SimplePriorityQueue<TKey, TCost>();
             var evaluated = new HashSet<TKey>();
 
-            bestNodes[start.Key] = start;
-            toEvaluate.Enqueue(start.Key, start.EstimatedCost);
+            foreach (var start in startNodes)
+            {
+                bestNodes[start.Key] = start;
+                toEvaluate.Enqueue(start.Key, start.EstimatedCost);
+            }
 
             while (true)
             {
@@ -25,6 +46,7 @@ namespace AoC.GraphSolver
                 {
                     //var x = bestNodes.Select(n => new { node = n.Value, next = n.Value.GetAdjacent().ToArray() })
                     //    .ToArray();
+                    whenDone(bestNodes, toEvaluate, evaluated);
                     return bestComplete;
                     //if (null != bestComplete)
                     //{
@@ -39,6 +61,7 @@ namespace AoC.GraphSolver
                 var work = bestNodes[workKey];
                 if (bestComplete != null && bestComplete.CurrentCost.CompareTo(work.EstimatedCost) < 0)
                 {
+                    whenDone(bestNodes, toEvaluate, evaluated);
                     return bestComplete;
                 }
                 evaluated.Add(work.Key);
@@ -48,6 +71,8 @@ namespace AoC.GraphSolver
                     {
                         continue;
                     }
+
+                    evaluateNode(next);
                     if (next.IsComplete)
                     {
                         if (null == bestComplete || next.CurrentCost.CompareTo(bestComplete.CurrentCost) < 0 || (next.CurrentCost.CompareTo(bestComplete.CurrentCost) == 0 && isBetter(next, bestComplete)))

@@ -104,6 +104,7 @@ namespace AoC.Year2018.Day23
                         continue;
                     yield return (point.Select((i, ix) => ix == a ? i + newRange + 1 : ix == b ? i + newRange + 1 : i).ToArray(), newRange);
                     yield return (point.Select((i, ix) => ix == a ? i + newRange + 1 : ix == b ? i - newRange - 1 : i).ToArray(), newRange);
+                    yield return (point.Select((i, ix) => ix == a ? i - newRange - 1 : ix == b ? i - newRange - 1 : i).ToArray(), newRange);
                 }
             }
         }

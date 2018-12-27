@@ -168,7 +168,7 @@ namespace AoC.Year2018.Day23
         private static int NumberOfBotsThatIntersect(int[][] bots, int[] point1, int[] point2)
         {
             var points = GetAllPoints(point1, point2);
-            // TODO: this only looks at the edge points - we need to look at more
+            // TODO: this only looks at the corner points - we need to look at more
             var range = point1.Zip(point2, (i1, i2) => new[] {i1, i2}.OrderBy(i => i).ToArray()).ToArray();
             return bots.Count(i => points.Any(ii => Distance(i, ii) <= i[3]) ||  // corner point in range
                                    range.Zip(i, (r, ii) => r[0] <= ii && ii <= r[1]).All(ii => ii)); // bot point is inside cube

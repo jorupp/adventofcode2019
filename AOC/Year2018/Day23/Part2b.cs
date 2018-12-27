@@ -31,7 +31,7 @@ namespace AoC.Year2018.Day23
                 var resultNode = new RealSolver().Evaluate<SearchNode, string, SearchResult>(startNodes, 
                     evaluateNode: node =>
                     {
-                        //Console.WriteLine($"Evaluating: {node.ToString()}");
+                        Console.WriteLine($"Evaluating: {node.ToString()}");
                     },
                     whenDone:
                     (best, todo, done) =>
@@ -157,7 +157,7 @@ namespace AoC.Year2018.Day23
                 return string.Join(",", _point1.Concat(_point2));
             }
 
-            public override string Description => $"{Key} -> {_cost}";
+            public override string Description => $"{_cost} <- {Key}";
         }
 
         private static long Distance(int[] i1, int[] i2)

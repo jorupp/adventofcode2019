@@ -59,12 +59,23 @@ namespace AoC.GraphSolver
                 }
                 var workKey = toEvaluate.Dequeue();
                 var work = bestNodes[workKey];
+                evaluateNode(work);
+                evaluated.Add(work.Key);
+                if (work.IsComplete)
+                {
+                    if (null == bestComplete || work.CurrentCost.CompareTo(bestComplete.CurrentCost) < 0 || (work.CurrentCost.CompareTo(bestComplete.CurrentCost) == 0 && isBetter(work, bestComplete)))
+                    {
+                        // new best - remember it
+                        bestComplete = work;
+                    }
+                    // no need to continue to evaluate complete nodes
+                    continue;
+                }
                 if (bestComplete != null && bestComplete.CurrentCost.CompareTo(work.EstimatedCost) < 0)
                 {
                     whenDone(bestNodes, toEvaluate, evaluated);
                     return bestComplete;
                 }
-                evaluated.Add(work.Key);
                 foreach (var next in work.GetAdjacent())
                 {
                     if (!next.IsValid)
@@ -72,17 +83,6 @@ namespace AoC.GraphSolver
                         continue;
                     }
 
-                    evaluateNode(next);
-                    if (next.IsComplete)
-                    {
-                        if (null == bestComplete || next.CurrentCost.CompareTo(bestComplete.CurrentCost) < 0 || (next.CurrentCost.CompareTo(bestComplete.CurrentCost) == 0 && isBetter(next, bestComplete)))
-                        {
-                            // new best - remember it
-                            bestComplete = next;
-                        }
-                        // no need to continue to evaluate complete nodes
-                        continue;
-                    }
                     if (bestNodes.TryGetValue(next.Key, out var existing))
                     {
                         // we've already seen this node - update the cost if better, but no need to process further

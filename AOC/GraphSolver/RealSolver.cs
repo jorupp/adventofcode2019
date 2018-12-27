@@ -14,7 +14,7 @@ namespace AoC.GraphSolver
             return Evaluate<TNode, TKey, TCost>(new[] {start}, isBetter);
         }
 
-        public TNode Evaluate<TNode, TKey, TCost>(TNode[] startNodes, Func<TNode, TNode, bool> isBetter = null, Action<TNode> evaluateNode = null, Action<Dictionary<TKey, TNode>, SimplePriorityQueue<TKey, TCost>, HashSet<TKey>> whenDone = null) where TNode : Node<TNode, TKey, TCost> where TCost : IComparable<TCost>
+        public TNode Evaluate<TNode, TKey, TCost>(TNode[] startNodes, Func<TNode, TNode, bool> isBetter = null, Action<TNode> evaluateNode = null, Action<TNode> queuedNode = null, Action<Dictionary<TKey, TNode>, SimplePriorityQueue<TKey, TCost>, HashSet<TKey>> whenDone = null) where TNode : Node<TNode, TKey, TCost> where TCost : IComparable<TCost>
         {
             if (null == isBetter)
             {
@@ -23,6 +23,10 @@ namespace AoC.GraphSolver
             if (null == evaluateNode)
             {
                 evaluateNode = i => { };
+            }
+            if (null == queuedNode)
+            {
+                queuedNode = i => { };
             }
             if (null == whenDone)
             {
@@ -97,6 +101,7 @@ namespace AoC.GraphSolver
                     // never seen this node before - track it and queue it up
                     bestNodes.Add(next.Key, next);
                     toEvaluate.Enqueue(next.Key, next.EstimatedCost);
+                    queuedNode(next);
                 }
             }
         }

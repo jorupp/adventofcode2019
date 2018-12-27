@@ -7,9 +7,9 @@ using AoC.GraphSolver;
 namespace AoC.Year2018.Day23
 {
     /// <summary>
-    /// A* w/ cubes
+    /// A* with octohedrans (Thanks Sean)
     /// </summary>
-    public class Part2b : BasePart
+    public class Part2c : BasePart
     {
         protected void RunScenario(string title, string input)
         {
@@ -18,24 +18,24 @@ namespace AoC.Year2018.Day23
                 var bots = input.NumbersLines();
                 int[] start = new[] {0, 0, 0};
 
-                // the best point must lie within the box created by the location of the bots and 0,0,0
-                var range = Enumerable.Range(0, 3).Select(i =>
-                    new { 
-                        min = bots.Concat(new [] { start }).Select(ii => ii[i]).Min(), 
-                        max = bots.Concat(new [] { start }).Select(ii => ii[i]).Max()
-                    }).ToArray();
+                // start from the center point with a range set to reach all the bots
+                var range = (int)bots.Max(i => Distance(i, start));
 
-                // this is way easier if we can assume that one of the corners of each cube we evaluate will always be the closest to the origin
-                var startNodes =
-                    GetSubAreas(range.Select(i => i.min).ToArray(), start, range.Select(i => i.max).ToArray())
-                        .Select(i => new SearchNode(i.Item1, i.Item2, bots, start))
-                        .ToArray();
+                // we start with the octohedran that is centered on the origin and is big enough to cover all the bots
+                var startNodes = new[]
+                {
+                    new SearchNode(start, range, bots, start),
+                };
 
-                var resultNode = new RealSolver().Evaluate<SearchNode, string, SearchResult>(startNodes, 
+                var resultNode = new RealSolver().Evaluate<SearchNode, string, SearchResult>(startNodes,
                     evaluateNode: node =>
                     {
                         Console.WriteLine($"Evaluating: {node.ToString()}");
-                    }, 
+                    },
+                    //queuedNode: node =>
+                    //{
+                    //    Console.WriteLine($"   Queued: {node.ToString()}");
+                    //},
                     whenDone:
                     (best, todo, done) =>
                     {
@@ -84,54 +84,49 @@ namespace AoC.Year2018.Day23
             }
         }
 
-        public static (int[], int[])[] GetSubAreas(int[] point1, int[] splitPoints, int[] point2)
+        public static IEnumerable<(int[], int)> GetSubAreas(int[] point, int range)
         {
-            // given the two corners of an area (point1 and point2) and a center point to split them by, create the 8 3D quadrants
-            var points = point1.Zip(splitPoints, (p1, p2) => new []{ p1, p2}).Zip(point2, (i, p3) => i.Concat(new [] {p3 }).ToArray() ).ToArray();
-            var q = (from x in new[] {0, 1}
-                    from y in new[] {0, 1}
-                    from z in new[] {0, 1}
-                    select new[] {x, y, z})
-                .Select(i => (i.Zip(points, (ix, ii) => ii[ix]).ToArray(), i.Zip(points, (ix, ii) => ii[ix + 1]).ToArray())).ToArray();
-            return q;
-        }
+            var newRange = range / 2;
 
-        public static (int[], int[])[] GetSubAreas(int[] point1, int[] point2)
-        {
-            return GetSubAreas(point1, point1.Zip(point2, (i1, i2) => (i1 + i2) / 2).ToArray(), point2);
-        }
+            // now get the ones on the primary axes
+            foreach (var a in Enumerable.Range(0, point.Length))
+            {
+                yield return (point.Select((i, ix) => ix == a ? i + newRange + 1 : i).ToArray(), newRange);
+                yield return (point.Select((i, ix) => ix == a ? i - newRange - 1 : i).ToArray(), newRange);
+            }
 
-        public static int[][] GetAllPoints(int[] point1, int[] point2)
-        {
-            // given the two corners of an area (point1 and point2) find the coordinates of all the corners
-            var points = point1.Zip(point2, (p1, p2) => new[] {p1, p2}).ToArray();
-            var q = (from x in new[] { 0, 1 }
-                    from y in new[] { 0, 1 }
-                    from z in new[] { 0, 1 }
-                    select new[] { x, y, z })
-                .Select(i => i.Zip(points, (ix, ii) => ii[ix]).ToArray()).ToArray();
-            return q;
+            // now the secondary axes (though these will be a bit too big, not sure how to correct that.  Oh well, too big is better than too small)
+            foreach (var a in Enumerable.Range(0, point.Length))
+            {
+                foreach (var b in Enumerable.Range(0, point.Length))
+                {
+                    if (b == a)
+                        continue;
+                    yield return (point.Select((i, ix) => ix == a ? i + newRange + 1 : ix == b ? i + newRange + 1 : i).ToArray(), newRange);
+                    yield return (point.Select((i, ix) => ix == a ? i + newRange + 1 : ix == b ? i - newRange - 1 : i).ToArray(), newRange);
+                }
+            }
         }
 
         public class SearchNode : Node<SearchNode, string, SearchResult>
         {
-            private readonly int[] _point1;
-            private readonly int[] _point2;
+            private readonly int[] _point;
+            private readonly int _range;
             private readonly int[][] _bots;
             private readonly int[] _origin;
             private SearchResult _cost;
 
-            public SearchNode(int[] point1, int[] point2, int[][] bots, int[] origin)
+            public SearchNode(int[] point, int range, int[][] bots, int[] origin)
             {
-                _point1 = point1;
-                _point2 = point2;
+                _point = point;
+                _range = range;
                 _bots = bots;
                 _origin = origin;
 
                 // compute the best-possible bot-count and closest-to-origin
-                var maxSize = _point1.Zip(_point2, (i1, i2) => Math.Abs(i1 - i2)).Max();
-                var botCount = NumberOfBotsThatIntersect(bots, point1, point2);
-                var distanceToOrigin = GetAllPoints(_point1, _point2).Select(i => Distance(i, origin)).Min();
+                var maxSize = _range;
+                var botCount = NumberOfBotsThatIntersect(bots, point, range);
+                var distanceToOrigin = Math.Max(0, Distance(point, origin) - range);
 
                 _cost = new SearchResult(maxSize, botCount, distanceToOrigin);
             }
@@ -145,7 +140,7 @@ namespace AoC.Year2018.Day23
                 }
 
                 // split into smaller areas
-                foreach (var subArea in GetSubAreas(_point1, _point2))
+                foreach (var subArea in GetSubAreas(_point, _range))
                 {
                     yield return new SearchNode(subArea.Item1, subArea.Item2, _bots, _origin);
                 }
@@ -157,7 +152,7 @@ namespace AoC.Year2018.Day23
             public override SearchResult EstimatedCost => _cost;
             protected override string GetKey()
             {
-                return string.Join(",", _point1.Concat(_point2));
+                return string.Join(",", _point.Concat(new [] { _range }));
             }
 
             public override string Description => $"{_cost} <- {Key}";
@@ -168,13 +163,9 @@ namespace AoC.Year2018.Day23
             return i1.Zip(i2, (ii, iii) => (long) Math.Abs(ii - iii)).Take(3).Sum();
         }
 
-        private static int NumberOfBotsThatIntersect(int[][] bots, int[] point1, int[] point2)
+        private static int NumberOfBotsThatIntersect(int[][] bots, int[] point, int range)
         {
-            var points = GetAllPoints(point1, point2);
-            // TODO: this only looks at the corner points - we need to look at more
-            var range = point1.Zip(point2, (i1, i2) => new[] {i1, i2}.OrderBy(i => i).ToArray()).ToArray();
-            return bots.Count(i => points.Any(ii => Distance(i, ii) <= i[3]) ||  // corner point in range
-                                   range.Zip(i, (r, ii) => r[0] <= ii && ii <= r[1]).All(ii => ii)); // bot point is inside cube
+            return bots.Count(i => Distance(point, i) <= range + i[3]); // bot is within range of the octohedran
         }
 
         public override void Run()

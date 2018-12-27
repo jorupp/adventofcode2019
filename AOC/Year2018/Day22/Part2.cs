@@ -17,8 +17,8 @@ namespace AoC.Year2018.Day22
                 var depth = lines[0].Numbers()[0];
                 var tx = lines[1].Numbers()[0];
                 var ty = lines[1].Numbers()[1];
-                var maxX = tx * 100;
-                var maxY = ty * 100;
+                var maxX = tx + 200;
+                var maxY = ty + 200;
 
                 var erosionLevels = new long[maxX + 1, maxY + 1];
                 var geologicIndexes = new long[maxX + 1, maxY + 1];
@@ -130,6 +130,10 @@ namespace AoC.Year2018.Day22
                 get
                 {
                     if (_x < 0 || _y < 0)
+                    {
+                        return false;
+                    }
+                    if (_x >= _types.GetUpperBound(0) || _y >= _types.GetUpperBound(1))
                     {
                         return false;
                     }

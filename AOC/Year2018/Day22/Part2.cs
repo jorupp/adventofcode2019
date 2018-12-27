@@ -71,7 +71,7 @@ namespace AoC.Year2018.Day22
                 }
 
                 var startNode = new PathNode(types, 0, 0, 0, Equipment.Torch, tx, ty, null);
-                var finalNode = new RealSolver().Evaluate(startNode, "", (i1, i2) => false);
+                var finalNode = new RealSolver().Evaluate<PathNode, string, decimal>(startNode, (i1, i2) => false);
 
                 Console.WriteLine(finalNode.CurrentCost);
             });

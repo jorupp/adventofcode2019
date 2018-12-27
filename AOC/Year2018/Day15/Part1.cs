@@ -156,7 +156,7 @@ namespace AoC.Year2018.Day15
         {
             var s = new RealSolver();
             var startNode = new LocationNode(start, null, noMove, end);
-            var result = s.Evaluate(startNode, startNode.Key, (newOne, oldOne) => IsBefore(newOne.First, oldOne.First));
+            var result = s.Evaluate<LocationNode, string, decimal>(startNode, (newOne, oldOne) => IsBefore(newOne.First, oldOne.First));
             if (null == result)
                 return null;
             return result.FullPath.ToArray();

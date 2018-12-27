@@ -9,11 +9,11 @@ namespace AoC.GraphSolver
 {
     public class RealSolver
     {
-        public TNode Evaluate<TNode, TKey>(TNode start, TKey key, Func<TNode, TNode, bool> isBetter) where TNode : Node<TNode, TKey>
+        public TNode Evaluate<TNode, TKey, TCost>(TNode start, Func<TNode, TNode, bool> isBetter) where TNode : Node<TNode, TKey, TCost> where TCost : IComparable<TCost>
         {
             TNode bestComplete = null;
             var bestNodes = new Dictionary<TKey, TNode>();
-            var toEvaluate = new SimplePriorityQueue<TKey, decimal>();
+            var toEvaluate = new SimplePriorityQueue<TKey, TCost>();
             var evaluated = new HashSet<TKey>();
 
             bestNodes[start.Key] = start;
@@ -37,7 +37,7 @@ namespace AoC.GraphSolver
                 }
                 var workKey = toEvaluate.Dequeue();
                 var work = bestNodes[workKey];
-                if (bestComplete != null && bestComplete.CurrentCost < work.EstimatedCost)
+                if (bestComplete != null && bestComplete.CurrentCost.CompareTo(work.EstimatedCost) < 0)
                 {
                     return bestComplete;
                 }
@@ -50,7 +50,7 @@ namespace AoC.GraphSolver
                     }
                     if (next.IsComplete)
                     {
-                        if (null == bestComplete || next.CurrentCost < bestComplete.CurrentCost || (next.CurrentCost == bestComplete.CurrentCost && isBetter(next, bestComplete)))
+                        if (null == bestComplete || next.CurrentCost.CompareTo(bestComplete.CurrentCost) < 0 || (next.CurrentCost.CompareTo(bestComplete.CurrentCost) == 0 && isBetter(next, bestComplete)))
                         {
                             // new best - remember it
                             bestComplete = next;
@@ -61,7 +61,8 @@ namespace AoC.GraphSolver
                     if (bestNodes.TryGetValue(next.Key, out var existing))
                     {
                         // we've already seen this node - update the cost if better, but no need to process further
-                        if (next.CurrentCost < existing.CurrentCost || (next.CurrentCost == existing.CurrentCost && isBetter(next, existing)))
+                        var compare = next.CurrentCost.CompareTo(existing.CurrentCost);
+                        if (compare < 0 || (compare == 0 && isBetter(next, existing)))
                         {
                             bestNodes[next.Key] = next;
                             toEvaluate.TryUpdatePriority(next.Key, next.EstimatedCost);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AoC.GraphSolver
 {
-    public abstract class Node<TNode, TKey> where TNode : Node<TNode, TKey>
+    public abstract class Node<TNode, TKey, TCost> where TNode : Node<TNode, TKey, TCost> where TCost : IComparable<TCost>
     {
         protected Node()
         {
@@ -15,8 +15,8 @@ namespace AoC.GraphSolver
         public abstract IEnumerable<TNode> GetAdjacent();
         public abstract bool IsValid { get; }
         public abstract bool IsComplete { get; }
-        public abstract decimal CurrentCost { get; }
-        public abstract decimal EstimatedCost { get; }
+        public abstract TCost CurrentCost { get; }
+        public abstract TCost EstimatedCost { get; }
 
         protected abstract TKey GetKey();
 
@@ -35,6 +35,18 @@ namespace AoC.GraphSolver
             }
         }
         public abstract string Description { get; }
+
+        public override string ToString()
+        {
+            return Description;
+        }
+    }
+
+    public abstract class Node<TNode, TKey>: Node<TNode, TKey, decimal> where TNode : Node<TNode, TKey>
+    {
+        protected Node()
+        {
+        }
     }
 
     public abstract class Node<TNode> : Node<TNode, string> where TNode : Node<TNode>

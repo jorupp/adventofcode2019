@@ -10,51 +10,56 @@ namespace AoC.Year2019.Day2
             RunScenario(title, () =>
             {
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-
+                var initialData = lines[0].Split(',').Select(int.Parse).ToArray();
 
                 for (var n = 0; n <= 99; n++)
                 {
                     for (var v = 0; v <= 99; v++)
                     {
-                        var data = lines[0].Split(',').Select(int.Parse).ToArray();
-
-                        var ip = 0;
+                        var data = initialData.ToArray();
 
                         data[1] = n;
                         data[2] = v;
 
-                        while (true)
-                        {
-                            var i = data[ip];
-                            switch (i)
-                            {
-                                case 1:
-                                    data[data[ip + 3]] = data[data[ip + 1]] + data[data[ip + 2]];
-                                    break;
-                                case 2:
-                                    data[data[ip + 3]] = data[data[ip + 1]] * data[data[ip + 2]];
-                                    break;
-                                case 99:
-                                    goto done;
-                                default:
-                                    throw new NotImplementedException();
-                            }
+                        Simulate(data);
 
-                            ip += 4;
-                        }
-                        done:
-
-                        Console.WriteLine($"{n} + {v} = {data[0]}");
                         if (data[0] == 19690720)
                         {
-                            Console.WriteLine(n);
-                            Console.WriteLine(v);
+                            Console.WriteLine($"n: {n} + v: {v} -> {data[0]}");
                             Console.WriteLine(100 * n + v);
                             return;
                         }
                     }
                 }
             });
+        }
+
+        private void Simulate(int[] data)
+        {
+            var ip = 0;
+
+            while (true)
+            {
+                var i = data[ip];
+                switch (i)
+                {
+                    case 1:
+                        data[data[ip + 3]] = data[data[ip + 1]] + data[data[ip + 2]];
+                        ip += 4;
+                        break;
+                    case 2:
+                        data[data[ip + 3]] = data[data[ip + 1]] * data[data[ip + 2]];
+                        ip += 4;
+                        break;
+                    case 99:
+                        ip += 1;
+                        return;
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                ip += 4;
+            }
         }
 
         public override void Run()

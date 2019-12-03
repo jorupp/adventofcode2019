@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using AOC.Year2019;
 
 namespace AoC.Year2019.Day2
 {
-    public class Part2 : BasePart
+    public class Part2b : BasePart
     {
         protected void RunScenario(string title, string input)
         {
@@ -12,16 +14,37 @@ namespace AoC.Year2019.Day2
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
                 var initialData = lines[0].Split(',').Select(int.Parse).ToArray();
 
+                var simulator = new Simulator(new Dictionary<int, Instruction>()
+                {
+                    {
+                        1, new Instruction(3, (data, args) =>
+                        {
+                            data[args[2]] = data[args[0]] + data[args[1]];
+                            return false;
+                        })
+                    },
+                    {
+                        2, new Instruction(3, (data, args) =>
+                        {
+                            data[args[2]] = data[args[0]] * data[args[1]];
+                            return false;
+                        })
+                    },
+                    {
+                        99, new Instruction(1, (data, args) => true)
+                    },
+                });
+
                 for (var n = 0; n <= 99; n++)
                 {
                     for (var v = 0; v <= 99; v++)
                     {
-                        var data = initialData.Select(i => i).ToArray();
+                        var data = initialData.ToArray();
 
                         data[1] = n;
                         data[2] = v;
 
-                        Simulate(data);
+                        simulator.Execute(data);
 
                         if (data[0] == 19690720)
                         {
@@ -31,35 +54,7 @@ namespace AoC.Year2019.Day2
                         }
                     }
                 }
-         
-                Console.WriteLine("No answer");
             });
-        }
-
-        private void Simulate(int[] data)
-        {
-            var ip = 0;
-
-            while (true)
-            {
-                var i = data[ip];
-                switch (i)
-                {
-                    case 1:
-                        data[data[ip + 3]] = data[data[ip + 1]] + data[data[ip + 2]];
-                        ip += 4;
-                        break;
-                    case 2:
-                        data[data[ip + 3]] = data[data[ip + 1]] * data[data[ip + 2]];
-                        ip += 4;
-                        break;
-                    case 99:
-                        ip += 1;
-                        return;
-                    default:
-                        throw new NotImplementedException();
-                }
-            }
         }
 
         public override void Run()

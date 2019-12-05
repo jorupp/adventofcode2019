@@ -58,7 +58,7 @@ namespace AoC.Year2019.Day5
                         var oval = GetParam(1);
                         output.Add(oval);
                         ip += 2;
-                        if (oval != 0 && data[ip] != 99)
+                        if (oval != 0 && data[ip] == 99)
                         {
                             Console.WriteLine("BROKEN");
                         }

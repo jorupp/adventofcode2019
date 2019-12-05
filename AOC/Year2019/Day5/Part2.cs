@@ -27,25 +27,35 @@ namespace AoC.Year2019.Day5
             while (true)
             {
                 var i = data[ip];
-                var p1Mode = i / 100 % 10;
-                var p2Mode = i / 1000 % 10;
-                var p3Mode = i / 10000 % 10;
+
+                int GetParam(int pNum)
+                {
+                    var pMode = i / (10 * (int)Math.Pow(10, pNum)) % 10;
+                    return data[pMode == 0 ? data[ip + pNum] : ip + pNum];
+                }
+                void SetByParam(int pNum, int value)
+                {
+                    // don't really need to support parameter mode here, but we will
+                    var pMode = i / (10 * (int)Math.Pow(10, pNum)) % 10;
+                    data[pMode == 0 ? data[ip + pNum] : ip + pNum] = value;
+                }
+
                 switch (i % 100)
                 {
                     case 1:
-                        data[data[ip + 3]] = data[p1Mode == 0 ? data[ip + 1] : ip + 1] + data[p2Mode == 0 ? data[ip + 2] : ip + 2];
+                        SetByParam(3, GetParam(1) + GetParam(2));
                         ip += 4;
                         break;
                     case 2:
-                        data[data[ip + 3]] = data[p1Mode == 0 ? data[ip + 1] : ip + 1] * data[p2Mode == 0 ? data[ip + 2] : ip + 2];
+                        SetByParam(3, GetParam(1) * GetParam(2));
                         ip += 4;
                         break;
                     case 3:
-                        data[data[ip + 1]] = input;
+                        SetByParam(1, input);
                         ip += 2;
                         break;
                     case 4:
-                        var oval = data[p1Mode == 0 ? data[ip + 1] : ip + 1];
+                        var oval = GetParam(1);
                         output.Add(oval);
                         ip += 2;
                         if (oval != 0 && data[ip] != 99)
@@ -54,9 +64,9 @@ namespace AoC.Year2019.Day5
                         }
                         break;
                     case 5:
-                        if (data[p1Mode == 0 ? data[ip + 1] : ip + 1] != 0)
+                        if (GetParam(1) != 0)
                         {
-                            ip = data[p2Mode == 0 ? data[ip + 2] : ip + 2];
+                            ip = GetParam(2);
                         }
                         else
                         {
@@ -64,9 +74,9 @@ namespace AoC.Year2019.Day5
                         }
                         break;
                     case 6:
-                        if (data[p1Mode == 0 ? data[ip + 1] : ip + 1] == 0)
+                        if (GetParam(1) == 0)
                         {
-                            ip = data[p2Mode == 0 ? data[ip + 2] : ip + 2];
+                            ip = GetParam(2);
                         }
                         else
                         {
@@ -74,25 +84,11 @@ namespace AoC.Year2019.Day5
                         }
                         break;
                     case 7:
-                        if (data[p1Mode == 0 ? data[ip + 1] : ip + 1] < data[p2Mode == 0 ? data[ip + 2] : ip + 2])
-                        {
-                            data[p3Mode == 0 ? data[ip + 3] : ip + 3] = 1;
-                        }
-                        else
-                        {
-                            data[p3Mode == 0 ? data[ip + 3] : ip + 3] = 0;
-                        }
+                        SetByParam(3, GetParam(1) < GetParam(2) ? 1 : 0);
                         ip += 4;
                         break;
                     case 8:
-                        if (data[p1Mode == 0 ? data[ip + 1] : ip + 1] == data[p2Mode == 0 ? data[ip + 2] : ip + 2])
-                        {
-                            data[p3Mode == 0 ? data[ip + 3] : ip + 3] = 1;
-                        }
-                        else
-                        {
-                            data[p3Mode == 0 ? data[ip + 3] : ip + 3] = 0;
-                        }
+                        SetByParam(3, GetParam(1) == GetParam(2) ? 1 : 0);
                         ip += 4;
                         break;
                     case 99:

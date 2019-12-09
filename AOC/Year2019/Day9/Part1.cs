@@ -13,7 +13,7 @@ namespace AoC.Year2019.Day9
             {
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-                var initialData = lines[0].Split(',').Select(long.Parse).Concat(Enumerable.Repeat(0l, 1000)).ToArray();
+                var initialData = lines[0].Split(',').Select(long.Parse).ToArray();
                 var inputData = new BlockingCollection<long>();
                 inputData.Add(inputValue);
                 var output = new List<long>();
@@ -24,28 +24,40 @@ namespace AoC.Year2019.Day9
             });
         }
 
+        private void Simulate(long[] data, BlockingCollection<long> input, ICollection<long> output, long ix)
+        {
+            Simulate(data.Select((i, ii) => new { i, ii }).ToDictionary(i => i.ii, i => i.i), input, output, ix);
+        }
 
-        private void Simulate(long[] data, BlockingCollection<long> input, ICollection<long> output, int ix)
+        private void Simulate(IDictionary<int, long> data, BlockingCollection<long> input, ICollection<long> output, long ix)
         {
             long ip = 0;
             long relativeBase = 0;
 
+            long GetValue(long dataIx)
+            {
+                return data.TryGetValue((int)dataIx, out var v) ? v : 0;
+            }
+
             while (true)
             {
-                var i = data[ip];
+                var i = GetValue(ip);
+
+                long GetParamIx(long pNum)
+                {
+                    var pMode = i / (10 * (long)Math.Pow(10, pNum)) % 10;
+                    var pix = pMode == 0 ? GetValue(ip + pNum) : pMode == 1 ? ip + pNum : relativeBase + GetValue(ip + pNum);
+                    //Console.WriteLine($"PMode: {pMode} for {pNum} -> {pix}");
+                    return pix;
+                }
 
                 long GetParam(long pNum)
                 {
-                    var pMode = i / (10 * (long)Math.Pow(10, pNum)) % 10;
-                    var pix = pMode == 0 ? data[ip + pNum] : pMode == 1 ? ip + pNum : relativeBase + data[ip + pNum];
-                    //Console.WriteLine($"PMode: {pMode} for {pNum} -> {pix}");
-                    return data[pix];
+                    return GetValue(GetParamIx(pNum));
                 }
                 void SetByParam(long pNum, long value)
                 {
-                    // don't really need to support parameter mode here, but we will
-                    var pMode = i / (10 * (long)Math.Pow(10, pNum)) % 10;
-                    data[pMode == 0 ? data[ip + pNum] : pMode == 1 ? ip + pNum : relativeBase + data[ip + pNum]] = value;
+                    data[(int)GetParamIx(pNum)] = value;
                 }
 
                 //Console.WriteLine($"Running opcode {i} @ {ip}");

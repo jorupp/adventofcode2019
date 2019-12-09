@@ -40,6 +40,7 @@ namespace AoC
 
             new Year2019.Day8.Part1().Run();
             new Year2019.Day8.Part2().Run();
+            new Year2019.Day8.Part2b().Run();
 
             //new Year2019.Day9.Part2().Run();
             //new Year2019.Day9.Part1().Run();

@@ -44,5 +44,24 @@ namespace AoC
             var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             return lines.Select(i => i.AlphaNumeric()).ToArray();
         }
+
+        public static IEnumerable<List<T>> Batch<T>(this IEnumerable<T> input, int batchSize)
+        {
+            var list = new List<T>();
+            foreach (var i in input)
+            {
+                list.Add(i);
+                if (list.Count == batchSize)
+                {
+                    yield return list;
+                    list = new List<T>();
+                }
+            }
+
+            if (list.Count != 0)
+            {
+                yield return list;
+            }
+        }
     }
 }

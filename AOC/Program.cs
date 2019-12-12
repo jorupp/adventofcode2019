@@ -48,12 +48,12 @@ namespace AoC
             //new Year2019.Day10.Part1().Run();
             //new Year2019.Day10.Part2().Run();
 
-            new Year2019.Day11.Part1().Run();
+            //new Year2019.Day11.Part1().Run();
             //new Year2019.Day11.Part2().Run();
             //new Year2019.Day11.Part3().Run();
 
             //new Year2019.Day12.Part1().Run();
-            //new Year2019.Day12.Part2().Run();
+            new Year2019.Day12.Part2().Run();
 
             //new Year2019.Day13.Part1().Run();
             //new Year2019.Day13.Part2().Run();

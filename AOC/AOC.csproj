@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Combinatorics" Version="1.1.0.19" />
+    <PackageReference Include="MathSharp" Version="2.0.0-pre" />
     <PackageReference Include="OptimizedPriorityQueue" Version="4.2.0" />
   </ItemGroup>
 

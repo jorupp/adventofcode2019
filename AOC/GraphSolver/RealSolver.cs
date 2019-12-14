@@ -96,11 +96,13 @@ namespace AoC.GraphSolver
                             bestNodes[next.Key] = next;
                             toEvaluate.TryUpdatePriority(next.Key, next.EstimatedCost);
                         }
+                        //Console.WriteLine($"Already seen node with ${next.CurrentCost} - {next.EstimatedCost}\n{existing.Description}\n{next.Description}\n");
                         continue;
                     }
                     // never seen this node before - track it and queue it up
                     bestNodes.Add(next.Key, next);
                     toEvaluate.Enqueue(next.Key, next.EstimatedCost);
+                    //Console.WriteLine($"Queued node with EC {next.EstimatedCost}");
                     queuedNode(next);
                 }
             }

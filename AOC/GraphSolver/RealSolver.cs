@@ -44,6 +44,8 @@ namespace AoC.GraphSolver
                 toEvaluate.Enqueue(start.Key, start.EstimatedCost);
             }
 
+            var bestEstimatedCost = bestNodes[toEvaluate.First].EstimatedCost;
+
             while (true)
             {
                 if (toEvaluate.Count == 0)
@@ -61,8 +63,18 @@ namespace AoC.GraphSolver
                     //return bestLeft;
 
                 }
+
+
                 var workKey = toEvaluate.Dequeue();
                 var work = bestNodes[workKey];
+
+                if (work.EstimatedCost.CompareTo(bestEstimatedCost) < 0)
+                {
+                    bestEstimatedCost = work.EstimatedCost;
+                    Console.WriteLine($"New best estimated cost: {bestEstimatedCost} - {work.Description}");
+                }
+
+
                 evaluateNode(work);
                 evaluated.Add(work.Key);
                 if (work.IsComplete)

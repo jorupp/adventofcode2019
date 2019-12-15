@@ -87,6 +87,8 @@ namespace AoC.Year2019.Day11
                     }
                     Console.WriteLine();
                 }
+
+                Console.WriteLine($"Memory min: {data.Keys.Min()}, max: {data.Keys.Max()}");
             });
         }
 

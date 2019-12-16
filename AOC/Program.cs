@@ -63,13 +63,13 @@ namespace AoC
             //new Year2019.Day14.Part2().Run();
 
             //new Year2019.Day15.Part1().Run();
-            new Year2019.Day15.Part1a().Run();
+            //new Year2019.Day15.Part1a().Run();
             //new Year2019.Day15.Part2().Run();
 
-            //new Year2019.Day16.Part1().Run();
+            new Year2019.Day16.Part1().Run();
             //new Year2019.Day16.Part2a().Run();
             //new Year2019.Day16.Part2b().Run();
-            //new Year2019.Day16.Part2().Run();
+            new Year2019.Day16.Part2().Run();
 
             //new Year2019.Day17.Part1().Run();
 

@@ -105,25 +105,32 @@ namespace AoC.Year2019.Day16
                 void RunPhase(int[] data, int[] output)
                 {
                     var length = data.Length;
-                    Enumerable.Range(0, length).AsParallel().ForAll(ix =>
+                    var r = 0;
+                    for (var ix = length - 1; ix >= 0; ix--)
                     {
-                        int r = 0;
-                        for (var jx = ix; jx < length; jx++)
-                        {
-                            r += data[jx];
-                            //switch (((jx + 1 + startPoint) / (ix + 1 + startPoint)) % 4)
-                            //{
-                            //    case 1:
-                            //        r += data[jx];
-                            //        break;
-                            //    case 3:
-                            //        r -= data[jx];
-                            //        break;
-                            //}
-                        }
-
+                        r += data[ix];
                         output[ix] = r % 10;
-                    });
+                    }
+
+                    //Enumerable.Range(0, length).AsParallel().ForAll(ix =>
+                    //{
+                    //    int r = 0;
+                    //    for (var jx = ix; jx < length; jx++)
+                    //    {
+                    //        r += data[jx];
+                    //        //switch (((jx + 1 + startPoint) / (ix + 1 + startPoint)) % 4)
+                    //        //{
+                    //        //    case 1:
+                    //        //        r += data[jx];
+                    //        //        break;
+                    //        //    case 3:
+                    //        //        r -= data[jx];
+                    //        //        break;
+                    //        //}
+                    //    }
+
+                    //    output[ix] = r % 10;
+                    //});
                     //for (var ix = 0; ix < length; ix++)
                     //{
                     //    int r = 0;

@@ -15,25 +15,31 @@ namespace AoC.Year2019.Day16
                 var numbers = lines[0].Select(i => long.Parse(i.ToString())).ToList();
                 var basePattern = new long[] {0, 1, 0, -1};
 
-                List<long> getPattern(long ix)
-                {
-                    var length = numbers.Count;
-                    return Enumerable.Range(0, (int)(length + ix)).SelectMany(i =>
-                        basePattern.SelectMany(ii => Enumerable.Range(0, (int)ix + 1).Select(iii => ii)))
-                        .Skip(1).Take(length).ToList();
-                }
+                //List<long> getPattern(long ix)
+                //{
+                //    var length = numbers.Count;
+                //    return Enumerable.Range(0, (int)(length + ix)).SelectMany(i =>
+                //        basePattern.SelectMany(ii => Enumerable.Range(0, (int)ix + 1).Select(iii => ii)))
+                //        .Skip(1).Take(length).ToList();
+                //}
 
                 List<long> RunPhase(List<long> data)
                 {
                     return data.Select((i, ix) =>
                     {
-                        var pattern = getPattern(ix);
-                        return Math.Abs(data.Zip(pattern, (a, b) => a * b).Sum()) % 10;
+                        //var pattern = patterns[ix];
+                        return Math.Abs(
+                                   data.Select((j, jx) =>
+                                   {
+                                       var pattern = basePattern[((jx + 1) / (ix + 1)) % 4];
+                                       return (j * pattern) % 10;
+                                   }).Sum()) % 10;
                     }).ToList();
                 }
 
                 for (var i = 0; i < numPhases; i++)
                 {
+                    Console.WriteLine($"Running phase {i}");
                     numbers = RunPhase(numbers);
                 }
 

@@ -187,7 +187,7 @@ namespace AoC.Year2019.Day16
 
                 for (var i = 0; i < numPhases; i++)
                 {
-                    Console.WriteLine($"Running phase {i}");
+                    //Console.WriteLine($"Running phase {i}");
                     //Console.WriteLine($"really running phase {i}");
                     var output = numbers.ToArray();
                     RunPhase(numbers, output);

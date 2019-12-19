@@ -62,7 +62,7 @@ namespace AoC.Year2019.Day19
                     var state1 = initialState.Resume(x);
                     var state2 = state1.Resume(y);
                     var r = state2.Output.Single() == 1;
-                    Console.WriteLine($"Checking {x},{y} -> {r}");
+                    //Console.WriteLine($"Checking {x},{y} -> {r}");
                     return r;
                     //var startWorked = state2.Output.Single() == 1;
                     //if (!startWorked)
@@ -83,8 +83,9 @@ namespace AoC.Year2019.Day19
                     //return false;
                 }
 
-                var workingD = DoSearchDown(1000000000, (d) =>
+                bool testD(long d)
                 {
+
                     var range = DoRangeSearch(0, d, x => works(x, d - x));
                     // 100x100 is different by 99 from left/right and top/bottom
                     if (range.Item2 - range.Item1 >= 99)
@@ -95,10 +96,18 @@ namespace AoC.Year2019.Day19
                         return true;
                     }
 
-                    Console.WriteLine($"{d} -> {range.Item1},{range.Item2}");
+                    //Console.WriteLine($"{d} -> {range.Item1},{range.Item2}");
 
                     return false;
-                });
+                }
+
+                var workingD = DoSearchDown(1000000000, testD);
+
+                for (var i = 0; i < 100; i++)
+                {
+                    var j = workingD - i;
+                    Console.WriteLine($"{j}: {testD(j)}");
+                }
 
                 var point = workedPoints.OrderBy(i => i.Item1 + i.Item2).First();
 
@@ -292,6 +301,7 @@ namespace AoC.Year2019.Day19
                 // 1069,1717 = 10691717 - SUBTRACT 2 FROM y -> 10691715
                 // 1070,1716 = 10701716 - add 1 to Y -> 10701717
                 // 1070,1717 = 10701717 - WRONG
+                // 1067,1712 = 10671712 - CORRECT
             });
         }
 
@@ -303,7 +313,7 @@ namespace AoC.Year2019.Day19
             {
                 if (test(target))
                 {
-                    Console.WriteLine($"DOWN {target} worked");
+                    //Console.WriteLine($"DOWN {target} worked");
                     bestWorking = target;
                     if (worstNotWorking == 0)
                     {
@@ -316,7 +326,7 @@ namespace AoC.Year2019.Day19
                 }
                 else
                 {
-                    Console.WriteLine($"DOWN {target} failed");
+                    //Console.WriteLine($"DOWN {target} failed");
                     worstNotWorking = target;
                     target += Math.Max(1, Math.Abs(worstNotWorking - bestWorking) / 2);
                     if (target == bestWorking)
@@ -337,7 +347,7 @@ namespace AoC.Year2019.Day19
                 //Console.WriteLine($"Trying {target}");
                 if (test(target))
                 {
-                    Console.WriteLine($"UP {target} worked");
+                    //Console.WriteLine($"UP {target} worked");
                     bestWorking = target;
                     if (worstNotWorking == long.MaxValue)
                     {
@@ -354,11 +364,11 @@ namespace AoC.Year2019.Day19
                     {
                         target += Math.Max(1, (worstNotWorking - bestWorking) / 2);
                     }
-                    Console.WriteLine($"UP new target {target}");
+                    //Console.WriteLine($"UP new target {target}");
                 }
                 else
                 {
-                    Console.WriteLine($"UP {target} failed");
+                    //Console.WriteLine($"UP {target} failed");
                     worstNotWorking = target;
                     target -= Math.Max(1, (worstNotWorking - bestWorking) / 2);
                     if (target == bestWorking)
@@ -387,7 +397,7 @@ namespace AoC.Year2019.Day19
                 {
                     var minValue = DoSearchDown(guess, i => i > guess ? false :test(i));
                     var maxValue = DoSearchUp(guess, i => i < guess ? false : test(i));
-                    Console.WriteLine($"{guess} min/max -> {minValue}, {maxValue}");
+                    //Console.WriteLine($"{guess} min/max -> {minValue}, {maxValue}");
                     return (Math.Min(minValue, maxValue), Math.Max(minValue, maxValue));
                 }
             }

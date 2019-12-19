@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AOC.Year2019.Day15;
 
 namespace AoC.Year2019.Day19
@@ -57,12 +58,19 @@ namespace AoC.Year2019.Day19
 
                 //var point = workedPoints.OrderBy(i => i.Item1 + i.Item2).First();
 
+                var cache = new Dictionary<(long, long), bool>();
                 bool works(long x, long y)
                 {
+                    if (cache.TryGetValue((x, y), out var v))
+                    {
+                        return v;
+                    }
+
                     var state1 = initialState.Resume(x);
                     var state2 = state1.Resume(y);
                     var r = state2.Output.Single() == 1;
                     //Console.WriteLine($"Checking {x},{y} -> {r}");
+                    cache[(x, y)] = r;
                     return r;
                     //var startWorked = state2.Output.Single() == 1;
                     //if (!startWorked)
@@ -258,19 +266,19 @@ namespace AoC.Year2019.Day19
                 //// 39486726538327
                 //// 3948605915,667388327 = 39486726538327 is probably wrong too
 
+                var sb = new StringBuilder();
                 for (var y = -20; y < 120; y++)
                 {
                     for (var x = -20; x < 120; x++)
                     {
-                        var state1 = initialState.Resume(x + point.Item1);
-                        var state2 = state1.Resume(y + point.Item2);
+                        var value = works(x + point.Item1, y + point.Item2);
                         var isShip = x >= 0 && x < 100 && y >= 0 && y < 100;
-                        Console.Write(state2.Output.Single() == 1 ? (isShip ? 'O' : '#') : (isShip ? 'X' : '.'));
+                        sb.Append(value ? (isShip ? 'O' : '#') : (isShip ? 'X' : '.'));
                     }
 
-                    Console.WriteLine();
+                    sb.AppendLine();
                 }
-                Console.WriteLine();
+                Console.WriteLine(sb.ToString());
 
                 Console.WriteLine($"{point.Item1},{point.Item2} = {point.Item1 * 10000 + point.Item2}");
 

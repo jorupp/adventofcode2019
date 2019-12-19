@@ -135,7 +135,7 @@ namespace AOC.Year2019.Day15
                         ip += 2;
                         break;
                     case 99:
-                        Console.WriteLine($"Terminating");
+                        //Console.WriteLine($"Terminating");
                         ip += 1;
                         halted = true; 
                         goto done;

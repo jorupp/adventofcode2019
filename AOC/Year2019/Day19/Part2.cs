@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AOC;
 using AOC.Year2019.Day15;
 
 namespace AoC.Year2019.Day19
@@ -109,7 +110,7 @@ namespace AoC.Year2019.Day19
                     return false;
                 }
 
-                var workingD = DoSearchDown(1000000000, testD);
+                var workingD = BinarySearch.GetMin(testD, 1000000000);
 
                 for (var i = 0; i < 100; i++)
                 {
@@ -312,83 +313,6 @@ namespace AoC.Year2019.Day19
                 // 1067,1712 = 10671712 - CORRECT
             });
         }
-
-        private long DoSearchDown(long target, Func<long, bool> test)
-        {
-            long bestWorking = long.MaxValue;
-            long worstNotWorking = 0;
-            while (true)
-            {
-                if (test(target))
-                {
-                    //Console.WriteLine($"DOWN {target} worked");
-                    bestWorking = target;
-                    if (worstNotWorking == 0)
-                    {
-                        target /= 2;
-                    }
-                    else
-                    {
-                        target -= Math.Max(1, Math.Abs(worstNotWorking - bestWorking) / 2);
-                    }
-                }
-                else
-                {
-                    //Console.WriteLine($"DOWN {target} failed");
-                    worstNotWorking = target;
-                    target += Math.Max(1, Math.Abs(worstNotWorking - bestWorking) / 2);
-                    if (target == bestWorking)
-                        break;
-                }
-            }
-
-            //Console.WriteLine($"Got result {bestWorking}");
-            return bestWorking;
-        }
-
-        private long DoSearchUp(long target, Func<long, bool> test)
-        {
-            long bestWorking = 0;
-            long worstNotWorking = long.MaxValue;
-            while (true)
-            {
-                //Console.WriteLine($"Trying {target}");
-                if (test(target))
-                {
-                    //Console.WriteLine($"UP {target} worked");
-                    bestWorking = target;
-                    if (worstNotWorking == long.MaxValue)
-                    {
-                        if (target == 0)
-                        {
-                            target = 1;
-                        }
-                        else
-                        {
-                            target *= 2;
-                        }
-                    }
-                    else
-                    {
-                        target += Math.Max(1, (worstNotWorking - bestWorking) / 2);
-                    }
-                    //Console.WriteLine($"UP new target {target}");
-                }
-                else
-                {
-                    //Console.WriteLine($"UP {target} failed");
-                    worstNotWorking = target;
-                    target -= Math.Max(1, (worstNotWorking - bestWorking) / 2);
-                    if (target == bestWorking)
-                        break;
-                }
-            }
-
-            //Console.WriteLine(bestWorking);
-            return bestWorking;
-        }
-
-
         private (long, long) DoRangeSearch(long min, long max, Func<long, bool> test)
         {
             //var minValue = test(min) ? min : DoSearchUp(min, i => i < max ? !test(i) : false) + 1;
@@ -403,8 +327,9 @@ namespace AoC.Year2019.Day19
                 var guess = (rnd.Next(int.MaxValue) * (long)rnd.Next(int.MaxValue)) % (max - min) + min;
                 if (test(guess))
                 {
-                    var minValue = DoSearchDown(guess, i => i > guess ? false :test(i));
-                    var maxValue = DoSearchUp(guess, i => i < guess ? false : test(i));
+                    //Console.WriteLine($"starting from guess {guess} - {min} - {max}");
+                    var minValue = BinarySearch.GetMin(i => i > guess ? false :test(i), guess, 0, guess);
+                    var maxValue = BinarySearch.GetMax(i => i < guess ? false : test(i), guess, guess);
                     //Console.WriteLine($"{guess} min/max -> {minValue}, {maxValue}");
                     return (Math.Min(minValue, maxValue), Math.Max(minValue, maxValue));
                 }

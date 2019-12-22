@@ -87,7 +87,7 @@ namespace AoC
             //new Year2019.Day21.Part1().Run();
             //new Year2019.Day21.Part2().Run();
 
-            new Year2019.Day22.Part1().Run();
+            //new Year2019.Day22.Part1().Run();
             new Year2019.Day22.Part2().Run();
 
             //new Year2019.Day23.Part1().Run();

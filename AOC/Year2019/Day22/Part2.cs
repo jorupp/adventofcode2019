@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using AOC;
 
 namespace AoC.Year2019.Day22
 {
@@ -13,68 +15,77 @@ namespace AoC.Year2019.Day22
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
 
-                long DealNewStack(long targetPosition)
+                Func<long, long> DealNewStack(Func<long, long> input)
                 {
-                    return numCards - targetPosition - 1;
+                    return (targetPosition) => numCards - input(targetPosition) - 1;
                 }
 
-                long Cut(long targetPosition, long count)
+                Func<long, long> Cut(Func<long, long> input, long count)
                 {
                     if (count < 0)
                     {
                         count = numCards + count;
                     }
 
-                    if (targetPosition < numCards - count)
+                    return (prev) =>
                     {
-                        return targetPosition + count;
-                    }
-                    else
-                    {
-                        return targetPosition - (numCards - count);
-                    }
+                        var targetPosition = input(prev);
+                        if (targetPosition < numCards - count)
+                        {
+                            return targetPosition + count;
+                        }
+                        else
+                        {
+                            return targetPosition - (numCards - count);
+                        }
+                    };
                 }
 
-                long DealWithIncrement(long targetPosition, long increment)
+                Func<long, long> DealWithIncrement(Func<long, long> input, long increment)
                 {
-                    long dealt = 0;
-                    long startPosition = 0;
-                    for (var i = 0; ; i++)
+                    return (prev) =>
                     {
-                        //Console.WriteLine($"T {targetPosition} {startPosition} {increment}");
-                        if ((targetPosition - startPosition) % increment == 0)
+                        var targetPosition = input(prev);
+                        long dealt = 0;
+                        long startPosition = 0;
+                        for (var i = 0; ; i++)
                         {
-                            break;
+                            //Console.WriteLine($"T {targetPosition} {startPosition} {increment}");
+                            if ((targetPosition - startPosition) % increment == 0)
+                            {
+                                break;
+                            }
+
+                            dealt += (long)Math.Ceiling(((decimal)numCards - startPosition) / increment);
+                            startPosition += increment - (numCards % increment);
+                            startPosition %= increment;
                         }
 
-                        dealt += (long)Math.Ceiling(((decimal)numCards - startPosition) / increment);
-                        startPosition += increment - (numCards % increment);
-                        startPosition %= increment;
-                    }
+                        //Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
+                        dealt += (targetPosition - startPosition) / increment;
 
-                    //Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
-                    dealt += (targetPosition - startPosition) / increment;
-
-                    return dealt;
+                        return dealt;
+                    };
                 }
 
-                long Compute(long targetPosition)
+                Func<long, long> Compute()
                 {
+                    Func<long, long> result = v => v;
                     foreach (var line in lines.Reverse())
                     {
                         if (line.StartsWith("deal with increment"))
                         {
                             var x = long.Parse(line.Split(' ').Last());
-                            targetPosition = DealWithIncrement(targetPosition, x);
+                            result = DealWithIncrement(result, x);
                         }
                         else if (line.StartsWith("cut"))
                         {
                             var x = long.Parse(line.Split(' ').Last());
-                            targetPosition = Cut(targetPosition, x);
+                            result = Cut(result, x);
                         }
                         else if (line.StartsWith("deal into new stack"))
                         {
-                            targetPosition = DealNewStack(targetPosition);
+                            result = DealNewStack(result);
                         }
                         else
                         {
@@ -82,35 +93,82 @@ namespace AoC.Year2019.Day22
                         }
                     }
 
-                    return targetPosition;
+                    return result;
                 }
 
-                //var initialTarget = targetPosition;
+                var compute = Compute();
+                //var valForZero = Compute()(0);
 
-                //for(long i = -20; i < 20; i++)
+                //// magic number derived from excel magic
+                //Func<long, long> compute = (i) =>
                 //{
-                //    Console.WriteLine($"{targetPosition + i}: {Compute(targetPosition + i):00000000000000000}");
-                //    ////Console.WriteLine(targetPosition);
+                //    {
+                //        return (long)((((new BigInteger(valForZero) - i * 15432842991580)) % numCards + numCards) % numCards);
+                //        //return ((((valForZero - i * 15432842991580)) % numCards + numCards) % numCards);
+                //    }
+                //};
 
-                //    //if (initialTarget == targetPosition)
-                //    //{
-                //    //    Console.WriteLine($"Looped in {i}");
-                //    //    return;
-                //    //}
+                //var realCompute = Compute();
 
-                //    //if (targetPosition < 10000000)
-                //    //{
+                //Console.WriteLine(compute(1970) == realCompute(1970));
+                //Console.WriteLine(compute(12124) == realCompute(12124));
+                //Console.WriteLine(compute(312341) == realCompute(312341));
+                //Console.WriteLine(compute(1212434) == realCompute(1212434));
+                //Console.WriteLine(compute(12124322) == realCompute(12124322));
+                //Console.WriteLine(compute(121243344) == realCompute(121243344));
+                //Console.WriteLine(compute(1212233324) == realCompute(1212233324));
+                //Console.WriteLine(compute(34324534523) == realCompute(34324534523));
+                //Console.WriteLine(compute(123412341234) == realCompute(123412341234));
 
-                //    //    Console.WriteLine($"Got to {targetPosition} in  {i}");
-                //    //    return;
-                //    //}
 
-                //    //if (i % 10000 == 0)
-                //    //{
-                //    //    Console.WriteLine($"Loop number {i}");
-                //    //}
+                //var splitPoint = BinarySearch.GetMax(i => compute(i) == realCompute(i), 312341, 0, numCards);
+                ////Console.WriteLine($"Split point: {splitPoint}");
+                ////Console.WriteLine(compute(splitPoint - 1));
+                ////Console.WriteLine(realCompute(splitPoint - 1));
+                ////Console.WriteLine(compute(splitPoint));
+                ////Console.WriteLine(realCompute(splitPoint));
+                ////Console.WriteLine(compute(splitPoint + 1));
+                ////Console.WriteLine(realCompute(splitPoint + 1));
+
+
+                //for (long i = -60; i < 50; i++)
+                //{
+                //    Console.WriteLine($"{splitPoint + i}: {realCompute(splitPoint + i):00000000000000000}  {compute(splitPoint + i):00000000000000000}");
                 //}
 
+
+                //var compute = Compute();
+                //var targetForMax = compute(numCards - 1);
+                //Console.WriteLine(targetForMax);
+                //compute = (i) =>
+                //    ((targetForMax - (i - (numCards - 1)) * 15432842991580)) % 119315717514047;
+                //var initialTarget = targetPosition;
+
+                //for (long i = -60; i < 50; i++)
+                //{
+                //    Console.WriteLine($"{targetPosition + i}: {compute(targetPosition + i):00000000000000000}");
+
+                //}
+
+                ////Console.WriteLine(targetPosition);
+
+                //if (initialTarget == targetPosition)
+                //{
+                //    Console.WriteLine($"Looped in {i}");
+                //    return;
+                //}
+
+                //if (targetPosition < 10000000)
+                //{
+
+                //    Console.WriteLine($"Got to {targetPosition} in  {i}");
+                //    return;
+                //}
+
+                //if (i % 10000 == 0)
+                //{
+                //    Console.WriteLine($"Loop number {i}");
+                //}
                 //for (long i = 0; i < 50; i++)
                 //{
                 //    Console.WriteLine($"{i:000}: {string.Join(" ", Enumerable.Range(11, 10).Select(i => $"{(targetPosition / i):000000000000000}"))}");
@@ -118,10 +176,27 @@ namespace AoC.Year2019.Day22
                 //}
 
 
+                //var compute = Compute();
                 var initialTarget = targetPosition;
-                for (long i = 0; ; i++)
+
+                var loopTarget = 101741582076661;
+                ////var loopTarget = 101741582076661 % 8828312 + 8828312 * 1;
+                //long loopTarget = 1234567 + 8828312;
+
+                //Console.WriteLine($"Target: {loopTarget}");
+                //targetPosition = initialTarget;
+                //for (long j = 0; j < loopTarget; j++)
+                //{
+                //    targetPosition = compute(targetPosition);
+                //}
+                //Console.WriteLine($"True result for {loopTarget}: {targetPosition}");
+                //targetPosition = initialTarget;
+
+                var seen = new Dictionary<long, long>();
+                for (long i = 1; ; i++)
                 {
-                    targetPosition = Compute(targetPosition);
+
+                    targetPosition = compute(targetPosition);
                     //Console.WriteLine(targetPosition);
 
                     if (initialTarget == targetPosition)
@@ -129,19 +204,60 @@ namespace AoC.Year2019.Day22
                         Console.WriteLine($"Looped in {i}");
                         return;
                     }
-                    if (targetPosition < 10000000)
-                    {
-                        Console.WriteLine($"Got to {targetPosition} in  {i}");
-                        return;
-                    }
+                    //if (targetPosition < 10000000)
+                    //{
+                    //    Console.WriteLine($"Got to {targetPosition} in  {i}");
+                    //    return;
+                    //}
 
                     if (i % 10000 == 0)
                     {
                         Console.WriteLine($"Loop number {i}");
                     }
+
+
+                    if (seen.TryGetValue(targetPosition, out var v))
+                    {
+                        var loopLength = (i - v);
+                        Console.WriteLine($"Looped from {i} to {v} in {loopLength}");
+                        var toRun = (loopTarget - v) % loopLength + v;
+                        Console.WriteLine($"Simulating {toRun} times");
+
+
+                        //targetPosition = initialTarget;
+                        //for (long j = 0; j < toRun; j++)
+                        //{
+                        //    targetPosition = compute(targetPosition);
+                        //}
+
+                        //Console.WriteLine(targetPosition);
+                        Console.WriteLine(seen.Single(i => i.Value == toRun).Key);
+
+                        return;
+                    }
+
+
+                    seen[targetPosition] = i;
                 }
             });
         }
+
+
+        //Loop number 0
+        //Loop number 10000000
+        //Looped from 11341386 to 2513075 in 8828311
+        //Simulating 3291424 times
+        //117669880996841
+        // 117669880996841 is too high
+
+        //Loop number 10000000
+        //Looped from 11341387 to 2513075 in 8828312
+        //Simulating 9423581 times
+        //100492035067907
+        //your answer is too high
+
+        //85821781804505 is wrong
+        //var toRun = (101741582076661) % loopLength;
 
         public override void Run()
         {
@@ -163,27 +279,27 @@ namespace AoC.Year2019.Day22
             //    RunScenario($"initial-{i}", @"cut -4", 10, i);
             //}
 
-//            foreach (var i in Enumerable.Range(0, 10))
-//            {
-//                RunScenario($"initial-{i}", @"deal with increment 7
-//deal into new stack
-//deal into new stack", 10, i);
+            //            foreach (var i in Enumerable.Range(0, 10))
+            //            {
+            //                RunScenario($"initial-{i}", @"deal with increment 7
+            //deal into new stack
+            //deal into new stack", 10, i);
 
-//            }
-//            foreach (var i in Enumerable.Range(0, 10))
-//            {
-//                RunScenario($"initial-{i}", @"deal into new stack
-//cut -2
-//deal with increment 7
-//cut 8
-//cut -4
-//deal with increment 7
-//cut 3
-//deal with increment 9
-//deal with increment 3
-//cut -1", 10, i);
+            //            }
+            //            foreach (var i in Enumerable.Range(0, 10))
+            //            {
+            //                RunScenario($"initial-{i}", @"deal into new stack
+            //cut -2
+            //deal with increment 7
+            //cut 8
+            //cut -4
+            //deal with increment 7
+            //cut 3
+            //deal with increment 9
+            //deal with increment 3
+            //cut -1", 10, i);
 
-//            }
+            //            }
 
 
 //            RunScenario("part1", @"cut -1353
@@ -286,7 +402,7 @@ namespace AoC.Year2019.Day22
 //deal into new stack
 //deal with increment 12
 //cut 5944", 10007, 3589);
-            //return;
+//            return;
             //return;
             //return;
             RunScenario("part1", @"cut -1353

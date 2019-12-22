@@ -58,11 +58,8 @@ namespace AoC.Year2019.Day22
                     return dealt;
                 }
 
-                var initialTarget = targetPosition;
-
-                for(long i = 0; ; i++)
+                long Compute(long targetPosition)
                 {
-                    //Console.WriteLine(targetPosition);
                     foreach (var line in lines.Reverse())
                     {
                         if (line.StartsWith("deal with increment"))
@@ -85,16 +82,55 @@ namespace AoC.Year2019.Day22
                         }
                     }
 
+                    return targetPosition;
+                }
+
+                //var initialTarget = targetPosition;
+
+                //for(long i = -20; i < 20; i++)
+                //{
+                //    Console.WriteLine($"{targetPosition + i}: {Compute(targetPosition + i):00000000000000000}");
+                //    ////Console.WriteLine(targetPosition);
+
+                //    //if (initialTarget == targetPosition)
+                //    //{
+                //    //    Console.WriteLine($"Looped in {i}");
+                //    //    return;
+                //    //}
+
+                //    //if (targetPosition < 10000000)
+                //    //{
+
+                //    //    Console.WriteLine($"Got to {targetPosition} in  {i}");
+                //    //    return;
+                //    //}
+
+                //    //if (i % 10000 == 0)
+                //    //{
+                //    //    Console.WriteLine($"Loop number {i}");
+                //    //}
+                //}
+
+                //for (long i = 0; i < 50; i++)
+                //{
+                //    Console.WriteLine($"{i:000}: {string.Join(" ", Enumerable.Range(11, 10).Select(i => $"{(targetPosition / i):000000000000000}"))}");
+                //    targetPosition = Compute(targetPosition);
+                //}
+
+
+                var initialTarget = targetPosition;
+                for (long i = 0; ; i++)
+                {
+                    targetPosition = Compute(targetPosition);
+                    //Console.WriteLine(targetPosition);
 
                     if (initialTarget == targetPosition)
                     {
                         Console.WriteLine($"Looped in {i}");
                         return;
                     }
-
                     if (targetPosition < 10000000)
                     {
-
                         Console.WriteLine($"Got to {targetPosition} in  {i}");
                         return;
                     }
@@ -104,8 +140,6 @@ namespace AoC.Year2019.Day22
                         Console.WriteLine($"Loop number {i}");
                     }
                 }
-
-
             });
         }
 

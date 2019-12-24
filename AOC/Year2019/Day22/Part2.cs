@@ -11,6 +11,39 @@ namespace AoC.Year2019.Day22
         //long a, x, b, c;
         //return (a * x + b) % c;
 
+        //return (a * ((d * x + e) % c) + b) % c;
+        //return (a * ((d * x + e)) + b) % c;
+        //return (a * d * x + a * e + b) % c;
+        //return (((a * d) % c) * x) + (a * e) % c + b) % c;
+
+        private class ModMathEvaluator
+        {
+            public ModMathEvaluator(BigInteger a, BigInteger b, BigInteger c)
+            {
+                A = a;
+                B = b;
+                C = c;
+            }
+
+            public BigInteger A { get; private set; }
+            public BigInteger B { get; private set; }
+            public BigInteger C { get; private set; }
+
+            public ModMathEvaluator AsInputTo(ModMathEvaluator wrap)
+            {
+                if (this.C != wrap.C)
+                {
+                    throw new NotImplementedException();
+                }
+                return new ModMathEvaluator((A * wrap.A).ModAbs(C), (wrap.A * B + wrap.B).ModAbs(C), C);
+            }
+
+            public BigInteger Apply(BigInteger input)
+            {
+                return (A * input + B).ModAbs(C);
+            }
+        }
+
         protected void RunScenario(string title, string input, long numCards, long targetPosition)
         {
             RunScenario(title, () =>
@@ -18,34 +51,37 @@ namespace AoC.Year2019.Day22
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
 
-                Func<long, long> DealNewStack(Func<long, long> input)
+                ModMathEvaluator DealNewStack()
                 {
-                    return (targetPosition) => (-1 * input(targetPosition) + -1).ModAbs(numCards);
+                    return new ModMathEvaluator(-1, -1, numCards);
+                    //return (targetPosition) => (-1 * input(targetPosition) + -1).ModAbs(numCards);
                 }
 
-                Func<long, long> Cut(Func<long, long> input, long count)
+                ModMathEvaluator Cut(long count)
                 {
-                    //if (count < 0)
+                    return new ModMathEvaluator(1, count, numCards);
+
+                    ////if (count < 0)
+                    ////{
+                    ////    count = numCards + count;
+                    ////}
+
+                    //return (prev) =>
                     //{
-                    //    count = numCards + count;
-                    //}
-
-                    return (prev) =>
-                    {
-                        var targetPosition = input(prev);
-                        return (1 * targetPosition + count).ModAbs(numCards);
-                        //if (targetPosition < numCards - count)
-                        //{
-                        //    return targetPosition + count;
-                        //}
-                        //else
-                        //{
-                        //    return targetPosition - (numCards - count);
-                        //}
-                    };
+                    //    var targetPosition = input(prev);
+                    //    return (1 * targetPosition + count).ModAbs(numCards);
+                    //    //if (targetPosition < numCards - count)
+                    //    //{
+                    //    //    return targetPosition + count;
+                    //    //}
+                    //    //else
+                    //    //{
+                    //    //    return targetPosition - (numCards - count);
+                    //    //}
+                    //};
                 }
 
-                Func<long, long> DealWithIncrement(Func<long, long> input, long increment)
+                ModMathEvaluator DealWithIncrement(long increment)
                 {
                     long dealt = 0;
                     long startPosition = 0;
@@ -64,55 +100,57 @@ namespace AoC.Year2019.Day22
 
                     //Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
                     dealt += (1 - startPosition) / increment;
+                    var a = dealt;
 
-                    return (prev) =>
-                    {
-                        var targetPosition = input(prev);
-                        var a = dealt;
-                        checked
-                        {
-                            return (a * targetPosition + 0).ModAbs(numCards);
-                        }
-                        //long dealt = 0;
-                        //long startPosition = 0;
-                        //for (var i = 0; ; i++)
-                        //{
-                        //    //Console.WriteLine($"T {targetPosition} {startPosition} {increment}");
-                        //    if ((targetPosition - startPosition) % increment == 0)
-                        //    {
-                        //        break;
-                        //    }
+                    return new ModMathEvaluator(a, 0, numCards);
 
-                        //    dealt += (long)Math.Ceiling(((decimal)numCards - startPosition) / increment);
-                        //    startPosition += increment - (numCards % increment);
-                        //    startPosition %= increment;
-                        //}
+                    //return (prev) =>
+                    //{
+                    //    var targetPosition = input(prev);
+                    //    checked
+                    //    {
+                    //        return (a * targetPosition + 0).ModAbs(numCards);
+                    //    }
+                    //    //long dealt = 0;
+                    //    //long startPosition = 0;
+                    //    //for (var i = 0; ; i++)
+                    //    //{
+                    //    //    //Console.WriteLine($"T {targetPosition} {startPosition} {increment}");
+                    //    //    if ((targetPosition - startPosition) % increment == 0)
+                    //    //    {
+                    //    //        break;
+                    //    //    }
 
-                        ////Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
-                        //dealt += (targetPosition - startPosition) / increment;
+                    //    //    dealt += (long)Math.Ceiling(((decimal)numCards - startPosition) / increment);
+                    //    //    startPosition += increment - (numCards % increment);
+                    //    //    startPosition %= increment;
+                    //    //}
 
-                        //return dealt;
-                    };
+                    //    ////Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
+                    //    //dealt += (targetPosition - startPosition) / increment;
+
+                    //    //return dealt;
+                    //};
                 }
 
-                Func<long, long> Compute()
+                ModMathEvaluator Compute()
                 {
-                    Func<long, long> result = v => v;
+                    var result = new ModMathEvaluator(1, 0, numCards);
                     foreach (var line in lines.Reverse())
                     {
                         if (line.StartsWith("deal with increment"))
                         {
                             var x = long.Parse(line.Split(' ').Last());
-                            result = DealWithIncrement(result, x);
+                            result = result.AsInputTo(DealWithIncrement(x));
                         }
                         else if (line.StartsWith("cut"))
                         {
                             var x = long.Parse(line.Split(' ').Last());
-                            result = Cut(result, x);
+                            result = result.AsInputTo(Cut(x));
                         }
                         else if (line.StartsWith("deal into new stack"))
                         {
-                            result = DealNewStack(result);
+                            result = result.AsInputTo(DealNewStack());
                         }
                         else
                         {
@@ -124,7 +162,7 @@ namespace AoC.Year2019.Day22
                 }
 
                 var compute = Compute();
-                Console.WriteLine(compute(targetPosition));
+                Console.WriteLine(compute.Apply(targetPosition));
                 //var valForZero = Compute()(0);
 
                 //// magic number derived from excel magic
@@ -317,10 +355,10 @@ namespace AoC.Year2019.Day22
             //}
 
             //foreach (var j in Enumerable.Range(2, 9))
-            //foreach (var i in Enumerable.Range(0, 11))
-            //{
-            //    RunScenario($"deal-increment-{j}-{i}", $"deal with increment {j}", 11, i);
-            //}
+            //    foreach (var i in Enumerable.Range(0, 11))
+            //    {
+            //        RunScenario($"deal-increment-{j}-{i}", $"deal with increment {j}", 11, i);
+            //    }
 
             //return;
 
@@ -358,107 +396,109 @@ namespace AoC.Year2019.Day22
 
 //            }
 
+//            return;
 
-//            RunScenario("part1", @"cut -1353
-//deal with increment 63
-//cut -716
-//deal with increment 55
-//cut 1364
-//deal with increment 61
-//cut 1723
-//deal into new stack
-//deal with increment 51
-//cut 11
-//deal with increment 65
-//cut -6297
-//deal with increment 69
-//cut -3560
-//deal with increment 20
-//cut 1177
-//deal with increment 29
-//cut 6033
-//deal with increment 3
-//cut -3564
-//deal into new stack
-//cut 6447
-//deal into new stack
-//cut -4030
-//deal with increment 3
-//cut -6511
-//deal with increment 42
-//cut -8748
-//deal with increment 38
-//cut 5816
-//deal with increment 73
-//cut 9892
-//deal with increment 16
-//cut -9815
-//deal with increment 10
-//cut 673
-//deal with increment 12
-//cut 4518
-//deal with increment 52
-//cut 9464
-//deal with increment 68
-//cut 902
-//deal with increment 11
-//deal into new stack
-//deal with increment 45
-//cut -5167
-//deal with increment 68
-//deal into new stack
-//deal with increment 24
-//cut -8945
-//deal into new stack
-//deal with increment 36
-//cut 3195
-//deal with increment 52
-//cut -1494
-//deal with increment 11
-//cut -9658
-//deal into new stack
-//cut -4689
-//deal with increment 34
-//cut -9697
-//deal with increment 39
-//cut -6857
-//deal with increment 19
-//cut -6790
-//deal with increment 59
-//deal into new stack
-//deal with increment 52
-//cut -9354
-//deal with increment 71
-//cut 8815
-//deal with increment 2
-//cut 6618
-//deal with increment 47
-//cut -6746
-//deal into new stack
-//cut 1336
-//deal with increment 53
-//cut 6655
-//deal with increment 17
-//cut 8941
-//deal with increment 25
-//cut -3046
-//deal with increment 14
-//cut -7818
-//deal with increment 25
-//cut 4140
-//deal with increment 60
-//cut 6459
-//deal with increment 27
-//cut -6791
-//deal into new stack
-//cut 3821
-//deal with increment 13
-//cut 3157
-//deal with increment 13
-//cut 8524
-//deal into new stack
-//deal with increment 12
-//cut 5944", 10007, 3589);
+
+            RunScenario("part1", @"cut -1353
+deal with increment 63
+cut -716
+deal with increment 55
+cut 1364
+deal with increment 61
+cut 1723
+deal into new stack
+deal with increment 51
+cut 11
+deal with increment 65
+cut -6297
+deal with increment 69
+cut -3560
+deal with increment 20
+cut 1177
+deal with increment 29
+cut 6033
+deal with increment 3
+cut -3564
+deal into new stack
+cut 6447
+deal into new stack
+cut -4030
+deal with increment 3
+cut -6511
+deal with increment 42
+cut -8748
+deal with increment 38
+cut 5816
+deal with increment 73
+cut 9892
+deal with increment 16
+cut -9815
+deal with increment 10
+cut 673
+deal with increment 12
+cut 4518
+deal with increment 52
+cut 9464
+deal with increment 68
+cut 902
+deal with increment 11
+deal into new stack
+deal with increment 45
+cut -5167
+deal with increment 68
+deal into new stack
+deal with increment 24
+cut -8945
+deal into new stack
+deal with increment 36
+cut 3195
+deal with increment 52
+cut -1494
+deal with increment 11
+cut -9658
+deal into new stack
+cut -4689
+deal with increment 34
+cut -9697
+deal with increment 39
+cut -6857
+deal with increment 19
+cut -6790
+deal with increment 59
+deal into new stack
+deal with increment 52
+cut -9354
+deal with increment 71
+cut 8815
+deal with increment 2
+cut 6618
+deal with increment 47
+cut -6746
+deal into new stack
+cut 1336
+deal with increment 53
+cut 6655
+deal with increment 17
+cut 8941
+deal with increment 25
+cut -3046
+deal with increment 14
+cut -7818
+deal with increment 25
+cut 4140
+deal with increment 60
+cut 6459
+deal with increment 27
+cut -6791
+deal into new stack
+cut 3821
+deal with increment 13
+cut 3157
+deal with increment 13
+cut 8524
+deal into new stack
+deal with increment 12
+cut 5944", 10007, 3589);
             return;
             //return;
             //return;

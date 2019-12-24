@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -65,6 +66,14 @@ namespace AoC
         }
 
         public static long ModAbs(this long value, long mod)
+        {
+            checked
+            {
+                return (value % mod + mod) % mod;
+            }
+        }
+
+        public static BigInteger ModAbs(this BigInteger value, BigInteger mod)
         {
             checked
             {

@@ -63,5 +63,13 @@ namespace AoC
                 yield return list;
             }
         }
+
+        public static long ModAbs(this long value, long mod)
+        {
+            checked
+            {
+                return (value % mod + mod) % mod;
+            }
+        }
     }
 }

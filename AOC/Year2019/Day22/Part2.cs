@@ -8,6 +8,9 @@ namespace AoC.Year2019.Day22
 {
     public class Part2 : BasePart
     {
+        //long a, x, b, c;
+        //return (a * x + b) % c;
+
         protected void RunScenario(string title, string input, long numCards, long targetPosition)
         {
             RunScenario(title, () =>
@@ -17,54 +20,78 @@ namespace AoC.Year2019.Day22
 
                 Func<long, long> DealNewStack(Func<long, long> input)
                 {
-                    return (targetPosition) => numCards - input(targetPosition) - 1;
+                    return (targetPosition) => (-1 * input(targetPosition) + -1).ModAbs(numCards);
                 }
 
                 Func<long, long> Cut(Func<long, long> input, long count)
                 {
-                    if (count < 0)
-                    {
-                        count = numCards + count;
-                    }
+                    //if (count < 0)
+                    //{
+                    //    count = numCards + count;
+                    //}
 
                     return (prev) =>
                     {
                         var targetPosition = input(prev);
-                        if (targetPosition < numCards - count)
-                        {
-                            return targetPosition + count;
-                        }
-                        else
-                        {
-                            return targetPosition - (numCards - count);
-                        }
+                        return (1 * targetPosition + count).ModAbs(numCards);
+                        //if (targetPosition < numCards - count)
+                        //{
+                        //    return targetPosition + count;
+                        //}
+                        //else
+                        //{
+                        //    return targetPosition - (numCards - count);
+                        //}
                     };
                 }
 
                 Func<long, long> DealWithIncrement(Func<long, long> input, long increment)
                 {
+                    long dealt = 0;
+                    long startPosition = 0;
+                    for (var i = 0; ; i++)
+                    {
+                        //Console.WriteLine($"T {targetPosition} {startPosition} {increment}");
+                        if ((1 - startPosition) % increment == 0)
+                        {
+                            break;
+                        }
+
+                        dealt += (long)Math.Ceiling(((decimal)numCards - startPosition) / increment);
+                        startPosition += increment - (numCards % increment);
+                        startPosition %= increment;
+                    }
+
+                    //Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
+                    dealt += (1 - startPosition) / increment;
+
                     return (prev) =>
                     {
                         var targetPosition = input(prev);
-                        long dealt = 0;
-                        long startPosition = 0;
-                        for (var i = 0; ; i++)
+                        var a = dealt;
+                        checked
                         {
-                            //Console.WriteLine($"T {targetPosition} {startPosition} {increment}");
-                            if ((targetPosition - startPosition) % increment == 0)
-                            {
-                                break;
-                            }
-
-                            dealt += (long)Math.Ceiling(((decimal)numCards - startPosition) / increment);
-                            startPosition += increment - (numCards % increment);
-                            startPosition %= increment;
+                            return (a * targetPosition + 0).ModAbs(numCards);
                         }
+                        //long dealt = 0;
+                        //long startPosition = 0;
+                        //for (var i = 0; ; i++)
+                        //{
+                        //    //Console.WriteLine($"T {targetPosition} {startPosition} {increment}");
+                        //    if ((targetPosition - startPosition) % increment == 0)
+                        //    {
+                        //        break;
+                        //    }
 
-                        //Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
-                        dealt += (targetPosition - startPosition) / increment;
+                        //    dealt += (long)Math.Ceiling(((decimal)numCards - startPosition) / increment);
+                        //    startPosition += increment - (numCards % increment);
+                        //    startPosition %= increment;
+                        //}
 
-                        return dealt;
+                        ////Console.WriteLine($"D {dealt} {targetPosition} {startPosition} {increment}");
+                        //dealt += (targetPosition - startPosition) / increment;
+
+                        //return dealt;
                     };
                 }
 
@@ -97,6 +124,7 @@ namespace AoC.Year2019.Day22
                 }
 
                 var compute = Compute();
+                Console.WriteLine(compute(targetPosition));
                 //var valForZero = Compute()(0);
 
                 //// magic number derived from excel magic
@@ -176,69 +204,69 @@ namespace AoC.Year2019.Day22
                 //}
 
 
-                //var compute = Compute();
-                var initialTarget = targetPosition;
+                ////var compute = Compute();
+                //var initialTarget = targetPosition;
 
-                var loopTarget = 101741582076661;
-                ////var loopTarget = 101741582076661 % 8828312 + 8828312 * 1;
-                //long loopTarget = 1234567 + 8828312;
+                //var loopTarget = 101741582076661;
+                //////var loopTarget = 101741582076661 % 8828312 + 8828312 * 1;
+                ////long loopTarget = 1234567 + 8828312;
 
-                //Console.WriteLine($"Target: {loopTarget}");
-                //targetPosition = initialTarget;
-                //for (long j = 0; j < loopTarget; j++)
+                ////Console.WriteLine($"Target: {loopTarget}");
+                ////targetPosition = initialTarget;
+                ////for (long j = 0; j < loopTarget; j++)
+                ////{
+                ////    targetPosition = compute(targetPosition);
+                ////}
+                ////Console.WriteLine($"True result for {loopTarget}: {targetPosition}");
+                ////targetPosition = initialTarget;
+
+                //var seen = new Dictionary<long, long>();
+                //for (long i = 1; ; i++)
                 //{
+
                 //    targetPosition = compute(targetPosition);
+                //    //Console.WriteLine(targetPosition);
+
+                //    if (initialTarget == targetPosition)
+                //    {
+                //        Console.WriteLine($"Looped in {i}");
+                //        return;
+                //    }
+                //    //if (targetPosition < 10000000)
+                //    //{
+                //    //    Console.WriteLine($"Got to {targetPosition} in  {i}");
+                //    //    return;
+                //    //}
+
+                //    if (i % 10000 == 0)
+                //    {
+                //        Console.WriteLine($"Loop number {i}");
+                //    }
+
+
+                //    if (seen.TryGetValue(targetPosition, out var v))
+                //    {
+                //        var loopLength = (i - v);
+                //        Console.WriteLine($"Looped from {i} to {v} in {loopLength}");
+                //        var toRun = (loopTarget - v) % loopLength + v;
+                //        Console.WriteLine($"Simulating {toRun} times");
+
+
+                //        //targetPosition = initialTarget;
+                //        //for (long j = 0; j < toRun; j++)
+                //        //{
+                //        //    targetPosition = compute(targetPosition);
+                //        //}
+
+                //        //Console.WriteLine(targetPosition);
+                //        Console.WriteLine(seen.Single(i => i.Value == toRun).Key);
+
+                //        return;
+                //    }
+
+
+                //    seen[targetPosition] = i;
                 //}
-                //Console.WriteLine($"True result for {loopTarget}: {targetPosition}");
-                //targetPosition = initialTarget;
-
-                var seen = new Dictionary<long, long>();
-                for (long i = 1; ; i++)
-                {
-
-                    targetPosition = compute(targetPosition);
-                    //Console.WriteLine(targetPosition);
-
-                    if (initialTarget == targetPosition)
-                    {
-                        Console.WriteLine($"Looped in {i}");
-                        return;
-                    }
-                    //if (targetPosition < 10000000)
-                    //{
-                    //    Console.WriteLine($"Got to {targetPosition} in  {i}");
-                    //    return;
-                    //}
-
-                    if (i % 10000 == 0)
-                    {
-                        Console.WriteLine($"Loop number {i}");
-                    }
-
-
-                    if (seen.TryGetValue(targetPosition, out var v))
-                    {
-                        var loopLength = (i - v);
-                        Console.WriteLine($"Looped from {i} to {v} in {loopLength}");
-                        var toRun = (loopTarget - v) % loopLength + v;
-                        Console.WriteLine($"Simulating {toRun} times");
-
-
-                        //targetPosition = initialTarget;
-                        //for (long j = 0; j < toRun; j++)
-                        //{
-                        //    targetPosition = compute(targetPosition);
-                        //}
-
-                        //Console.WriteLine(targetPosition);
-                        Console.WriteLine(seen.Single(i => i.Value == toRun).Key);
-
-                        return;
-                    }
-
-
-                    seen[targetPosition] = i;
-                }
             });
         }
 
@@ -261,45 +289,74 @@ namespace AoC.Year2019.Day22
 
         public override void Run()
         {
+
             //            foreach (var i in Enumerable.Range(0, 10))
             //            {
-            //                RunScenario($"initial-{i}", @"deal into new stack
-            //deal into new stack", 10, i);
-
+            //                RunScenario($"dealnewstack-{i}", @"deal into new stack", 10, i);
             //            }
+
+            //            foreach (var i in Enumerable.Range(0, 10))
+            //            {
+            //                RunScenario($"dealnewstacktwice-{i}", @"deal into new stack
+            //deal into new stack", 10, i);
+            //            }
+
+            //            return;
 
             //foreach (var i in Enumerable.Range(0, 10))
             //{
-            //    RunScenario($"initial-{i}", @"deal with increment 3", 10, i);
+            //    RunScenario($"deal-increment-3-{i}", @"deal with increment 3", 10, i);
+            //}
+            //foreach (var i in Enumerable.Range(0, 10))
+            //{
+            //    RunScenario($"deal-increment-7-{i}", @"deal with increment 7", 10, i);
+            //}
+            //foreach (var i in Enumerable.Range(0, 10))
+            //{
+            //    RunScenario($"deal-increment-9-{i}", @"deal with increment 9", 10, i);
+            //}
 
+            //foreach (var j in Enumerable.Range(2, 9))
+            //foreach (var i in Enumerable.Range(0, 11))
+            //{
+            //    RunScenario($"deal-increment-{j}-{i}", $"deal with increment {j}", 11, i);
+            //}
+
+            //return;
+
+            //foreach (var i in Enumerable.Range(0, 10))
+            //{
+            //    RunScenario($"cut-minus4-{i}", @"cut -4", 10, i);
             //}
 
             //foreach (var i in Enumerable.Range(0, 10))
             //{
-            //    RunScenario($"initial-{i}", @"cut -4", 10, i);
+            //    RunScenario($"cut6-{i}", @"cut 6", 10, i);
             //}
 
-            //            foreach (var i in Enumerable.Range(0, 10))
-            //            {
-            //                RunScenario($"initial-{i}", @"deal with increment 7
-            //deal into new stack
-            //deal into new stack", 10, i);
+            //return;
 
-            //            }
-            //            foreach (var i in Enumerable.Range(0, 10))
-            //            {
-            //                RunScenario($"initial-{i}", @"deal into new stack
-            //cut -2
-            //deal with increment 7
-            //cut 8
-            //cut -4
-            //deal with increment 7
-            //cut 3
-            //deal with increment 9
-            //deal with increment 3
-            //cut -1", 10, i);
+//            foreach (var i in Enumerable.Range(0, 10))
+//            {
+//                RunScenario($"initial-{i}", @"deal with increment 7
+//deal into new stack
+//deal into new stack", 10, i);
 
-            //            }
+//            }
+//            foreach (var i in Enumerable.Range(0, 10))
+//            {
+//                RunScenario($"initial-{i}", @"deal into new stack
+//cut -2
+//deal with increment 7
+//cut 8
+//cut -4
+//deal with increment 7
+//cut 3
+//deal with increment 9
+//deal with increment 3
+//cut -1", 10, i);
+
+//            }
 
 
 //            RunScenario("part1", @"cut -1353
@@ -402,7 +459,7 @@ namespace AoC.Year2019.Day22
 //deal into new stack
 //deal with increment 12
 //cut 5944", 10007, 3589);
-//            return;
+            return;
             //return;
             //return;
             RunScenario("part1", @"cut -1353

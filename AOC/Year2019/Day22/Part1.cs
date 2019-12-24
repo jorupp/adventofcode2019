@@ -84,6 +84,14 @@ namespace AoC.Year2019.Day22
 
         public override void Run()
         {
+
+            foreach (var j in Enumerable.Range(2, 21))
+            {
+                RunScenario($"deal-increment-{j}", $"deal with increment {j}", 23);
+            }
+
+            return;
+
             RunScenario("initial", @"deal with increment 7
 deal into new stack
 deal into new stack", 10);

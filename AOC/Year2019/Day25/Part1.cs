@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using AoC.GraphSolver;
 using AOC.Year2019.Day15;
+using Combinatorics.Collections;
 
 namespace AoC.Year2019.Day25
 {
@@ -168,6 +169,7 @@ take festive hat
 west
 west
 south
+take easter egg
 north
 take jam
 east
@@ -179,6 +181,25 @@ east
 north
 west
 north
+north
+take tambourine
+south
+south
+east
+north
+west
+west
+west
+take space heater
+east
+east
+south
+take antenna
+north
+west
+west
+west
+west
 ".Replace("\r", "");
 
 
@@ -206,11 +227,89 @@ north
                         writeout();
                     }
 
-                    findstuff(state);
+                    //foreach (var c in "east")
+                    //{
+                    //    state = state.Resume(c);
+                    //}
+                    //state = state.Resume('\n');
+
+                    //findstuff(state);
+                    //return;
+
+                    var options = @"drop fixed point
+drop festive hat
+drop easter egg
+drop jam
+drop asterisk
+drop space heater
+drop antenna
+drop tambourine".Split(new[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);//.Concat(null).ToArray();
+
+                    foreach (var len in Enumerable.Range(0, options.Length + 1))
+                    {
+                        foreach (var option in new Combinations<string>(options, len))
+                        {
+                            //Console.WriteLine($"Checking {string.Join(", ", option)}");
+
+                            var tempState = state;
+
+                            void write()
+                            {
+                                var output = new string(tempState.Output.Select(i => (char)i).ToArray());
+                                Console.WriteLine(output);
+                            }
+
+                            foreach (var optionItem in option)
+                            {
+                                foreach (var c in optionItem)
+                                {
+                                    //Console.Write(c);
+                                    tempState = tempState.Resume(c);
+                                }
+
+                                //Console.WriteLine();
+                                tempState = tempState.Resume('\n');
+                                //write();
+                            }
+
+                            foreach (var c in "west")
+                            {
+                                //Console.Write(c);
+                                tempState = tempState.Resume(c);
+                            }
+                            //Console.WriteLine();
+                            tempState = tempState.Resume('\n');
+                            //write();
+
+                            var output = new string(tempState.Output.Select(i => (char)i).ToArray());
+                            if (abort1.IsMatch(output) || abort2.IsMatch(output))
+                            {
+                                Console.WriteLine($"Failed {string.Join(", ", option)}");
+                            }
+                            else
+                            {
+                                Console.WriteLine(string.Join(", ", option));
+                                Console.WriteLine(output);
+                                Console.WriteLine("Found it");
+                                return;
+                            }
+                        }
+                    }
+                    //findstuff(state);
+
+
+                    //foreach (var c in "east")
+                    //{
+                    //    state = state.Resume(c);
+                    //}
+                    //state = state.Resume('\n');
+
+                    //findstuff(state);
+
                 }
 
-                //v1();
-                //return;
+                v1();
+                return;
                 // -3, 1 - space header
                 // -
 

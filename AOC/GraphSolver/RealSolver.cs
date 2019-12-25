@@ -108,7 +108,7 @@ namespace AoC.GraphSolver
                             bestNodes[next.Key] = next;
                             toEvaluate.TryUpdatePriority(next.Key, next.EstimatedCost);
                         }
-                        //Console.WriteLine($"Already seen node with ${next.CurrentCost} - {next.EstimatedCost}\n{existing.Description}\n{next.Description}\n");
+                        //Console.WriteLine($"Already seen node with {next.CurrentCost} - {next.EstimatedCost}\n{existing.Description}\n{next.Description}\n");
                         continue;
                     }
                     // never seen this node before - track it and queue it up

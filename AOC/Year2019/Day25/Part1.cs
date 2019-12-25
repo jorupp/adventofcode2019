@@ -27,7 +27,8 @@ namespace AoC.Year2019.Day25
         static Regex security = new Regex("In the next room, a pressure-sensitive floor will verify your identity.");
         static Regex itemsHereRe = new Regex(@"Items here:\n(.*)\n{2}");
         static Regex itemsRe = new Regex("^- (.*)$", RegexOptions.Multiline);
-        static Regex abort = new Regex("Alert! Droids on this ship are heavier than the detected value");
+        static Regex abort1 = new Regex("Alert! Droids on this ship are heavier than the detected value");
+        static Regex abort2 = new Regex("Alert! Droids on this ship are lighter than the detected value");
 
         static IntCodeSimulationState doit(IntCodeSimulationState state, string command)
         {
@@ -256,7 +257,49 @@ north
                 //    }
                 //}
 
-                new RealSolver().Evaluate<MapNode, string, int>(new MapNode(0, 0, new string[0], new string[0], start, new string[0], false));
+                var altState = start;
+                foreach (var c in @"south
+south
+south
+take fixed point
+south
+take festive hat
+west
+west
+south
+fake egg
+north
+take jam
+east
+east
+north
+west
+take asterisk
+east
+north
+west
+north
+".Replace("\r", ""))
+                {
+                    altState = altState.Resume(c);
+                }
+
+                new RealSolver().Evaluate<MapNode, string, int>(new[]
+                {
+                    new MapNode(0, 0, new string[0], new string[0], altState, new string[0], false, new (int, int)[0])
+                }, null, null, null, (a, b, c) =>
+                {
+                    var n = a.OrderByDescending(i => i.Value.CurrentCost).First().Value;
+                    Console.WriteLine($"{n.Key}\r\n{n.Description}\r\n{n.IsComplete}");
+                    n.DumpState();
+
+                    //var wAntenna = a.Where(i => i.Value.Description.Contains("antenna")).OrderBy(i => i.Value.CurrentCost).ToList();
+                    //foreach (var w in wAntenna)
+                    //{
+                    //    Console.WriteLine(w.Value.Description);
+                    //}
+
+                });
 
                 Console.WriteLine("Exited");
             });
@@ -317,8 +360,9 @@ west",
             private IntCodeSimulationState _state;
             private string[] _doors;
             private bool _wasSecurity;
+            private (int, int)[] _rooms;
 
-            public MapNode(int x, int y, string[] moves, string[] items, IntCodeSimulationState state, string[] doors, bool wasSecurity)
+            public MapNode(int x, int y, string[] moves, string[] items, IntCodeSimulationState state, string[] doors, bool wasSecurity, (int, int)[] rooms)
             {
                 _x = x;
                 _y = y;
@@ -327,6 +371,14 @@ west",
                 _state = state;
                 _doors = doors;
                 _wasSecurity = wasSecurity;
+                _rooms = rooms;
+            }
+
+            public void DumpState()
+            {
+
+                var output = new string(_state.Output.Select(i => (char)i).ToArray());
+                Console.WriteLine(output);
             }
 
             public override IEnumerable<MapNode> GetAdjacent()
@@ -334,21 +386,21 @@ west",
                 var output = new string(_state.Output.Select(i => (char)i).ToArray());
                 var wasSecurity = security.IsMatch(output);
 
-                var path = string.Join("\r\n", _moves);
-                var needDebug = magicPaths.Any(i => i.StartsWith(path)) && _moves.Length >= 7;
-                if (needDebug)
-                {
-                    Console.WriteLine($"On the right path: " + path);
-                    Console.WriteLine($"{_x},{_y}");
-                    Console.WriteLine(output);
-                    Console.WriteLine(this.Key);
-                    if (_moves.Length >= 7)
-                    {
+                //var path = string.Join("\r\n", _moves);
+                //var needDebug = magicPaths.Any(i => i.StartsWith(path)) && _moves.Length >= 7;
+                //if (needDebug)
+                //{
+                //    Console.WriteLine($"On the right path: " + path);
+                //    Console.WriteLine($"{_x},{_y}");
+                //    Console.WriteLine(output);
+                //    Console.WriteLine(this.Key);
+                //    if (_moves.Length >= 7)
+                //    {
 
-                    }
-                }
+                //    }
+                //}
 
-                if (abort.IsMatch(output))
+                if (abort1.IsMatch(output) || abort2.IsMatch(output))
                 {
                     Console.WriteLine($"Failed security: {this.Description}");
                     //Console.WriteLine(output);
@@ -381,12 +433,12 @@ west",
                     x += d.Item1;
                     y += d.Item2;
 
-                    if (needDebug)
-                    {
-                        Console.WriteLine($"Navigating to {door}");
-                    }
+                    //if (needDebug)
+                    //{
+                    //    Console.WriteLine($"Navigating to {door}");
+                    //}
 
-                    yield return new MapNode(x, y, _moves.Append(door).ToArray(), _items, doit(_state, door), new string[0], wasSecurity);
+                    yield return new MapNode(x, y, _moves.Append(door).ToArray(), _items, doit(_state, door), new string[0], wasSecurity, _rooms.Append((x, y)).ToArray());
                 }
 
                 var itemsHere = itemsHereRe.Match(output);
@@ -399,43 +451,48 @@ west",
                         {
                             continue;
                         }
-
-                        if (item == "giant electromagnet" && !_items.Contains("fake magnet"))
+                        if (item == "giant electromagnet")
                         {
-                            if (needDebug)
-                            {
-                                Console.WriteLine($"Navigating to fake magnet");
-                            }
-
-                            yield return new MapNode(_x, _y, _moves.Append("fake magnet").ToArray(), _items.Append("fake magnet").ToArray(), _state, hasDoors, wasSecurity);
                             continue;
                         }
-                        if (item == "easter egg" && !_items.Contains("fake egg"))
-                        {
-                            if (needDebug)
-                            {
-                                Console.WriteLine($"Navigating to fake egg");
-                            }
-                            yield return new MapNode(_x, _y, _moves.Append("fake egg").ToArray(), _items.Append("fake egg").ToArray(), _state, hasDoors, wasSecurity);
-                        }
+
+
+                        //if (item == "giant electromagnet" && !_items.Contains("fake magnet"))
+                        //{
+                        //    //if (needDebug)
+                        //    //{
+                        //    //    Console.WriteLine($"Navigating to fake magnet");
+                        //    //}
+
+                        //    yield return new MapNode(_x, _y, _moves.Append("fake magnet").ToArray(), _items.Append("fake magnet").ToArray(), _state, hasDoors, wasSecurity, _rooms);
+                        //    continue;
+                        //}
+                        //if (item == "easter egg" && !_items.Contains("fake egg"))
+                        //{
+                        //    //if (needDebug)
+                        //    //{
+                        //    //    Console.WriteLine($"Navigating to fake egg");
+                        //    //}
+                        //    yield return new MapNode(_x, _y, _moves.Append("fake egg").ToArray(), _items.Append("fake egg").ToArray(), _state, hasDoors, wasSecurity, _rooms);
+                        //}
                         var cmd = "take " + item;
 
-                        if (needDebug)
-                        {
-                            Console.WriteLine($"Navigating to {cmd}");
-                        }
-                        yield return new MapNode(_x, _y, _moves.Append(cmd).ToArray(), _items.Append(item).ToArray(), doit(_state, cmd), hasDoors, wasSecurity);
+                        //if (needDebug)
+                        //{
+                        //    Console.WriteLine($"Navigating to {cmd}");
+                        //}
+                        yield return new MapNode(_x, _y, _moves.Append(cmd).ToArray(), _items.Append(item).ToArray(), doit(_state, cmd), hasDoors, wasSecurity, _rooms);
                     }
 
-                    if (needDebug)
-                    {
-                        Console.WriteLine($"items: {string.Join(",", thisItems)}");
-                    }
+                    //if (needDebug)
+                    //{
+                    //    Console.WriteLine($"items: {string.Join(",", thisItems)}");
+                    //}
                 }
-                if (needDebug)
-                {
-                    Console.WriteLine($"doors: {string.Join(",", hasDoors)}");
-                }
+                //if (needDebug)
+                //{
+                //    Console.WriteLine($"doors: {string.Join(",", hasDoors)}");
+                //}
 
                 if (output.Contains("lava"))
                 {
@@ -469,7 +526,7 @@ west",
 
             protected override string GetKey()
             {
-                return $"{_x},{_y},{string.Join(",", _items)}";
+                return $"{_x},{_y},{string.Join(",", _items.OrderBy(i => i))},{string.Join(",", _rooms.OrderBy(i => i.Item1).ThenBy(i => i.Item2).Select(i => $"{i.Item1},{i.Item2}"))}";
             }
 
             public override string Description

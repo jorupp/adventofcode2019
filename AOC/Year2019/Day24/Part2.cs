@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AOC;
 
 namespace AoC.Year2019.Day24
 {
@@ -12,7 +13,7 @@ namespace AoC.Year2019.Day24
             {
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
-                var state = new Dictionary<(int, int, int), bool>();
+                var state = new Dictionary<(int, int, int), bool>().WithDefault(false);
 
                 for (var y = 0; y < lines.Length; y++)
                 {
@@ -152,11 +153,11 @@ namespace AoC.Year2019.Day24
                             (1, 2, -1),
                         }
                     },
-                };
+                }.WithDefault(new List<(int, int, int)>());
 
-                Dictionary<(int, int, int), bool> getNextState(Dictionary<(int, int, int), bool> state)
+                DefaultDictionary<(int, int, int), bool> getNextState(DefaultDictionary<(int, int, int), bool> state)
                 {
-                    var newState = new Dictionary<(int, int, int), bool>();
+                    var newState = new Dictionary<(int, int, int), bool>().WithDefault(false);
                     var levels = state.Where(i => i.Value).Select(i => i.Key.Item3).Distinct().ToList();
                     var mnLevel = levels.Min() - 1;
                     var mxLevel = levels.Max() + 1;
@@ -169,14 +170,13 @@ namespace AoC.Year2019.Day24
                                 var numAdjacent = adjacent
                                     .Select(i => (x + i.Item1, y + i.Item2, l))
                                     .Where(i => i.Item1 != 2 || i.Item2 != 2)
-                                    .Select(i => state.TryGetValue(i, out var v) ? v : false)
+                                    .Select(i => state[i])
                                     .Count(i => i);
 
-                                if (extraMaps.TryGetValue((x, y), out var extra))
                                 {
-                                    var numAdjacentOtherLevels = 
-                                        extra.Select(i => (i.Item1, i.Item2, l + i.Item3))
-                                            .Select(i => state.TryGetValue(i, out var v) ? v : false)
+                                    var numAdjacentOtherLevels =
+                                        extraMaps[(x, y)].Select(i => (i.Item1, i.Item2, l + i.Item3))
+                                            .Select(i => state[i])
                                             .Count(i => i);
                                     numAdjacent += numAdjacentOtherLevels;
                                 }
@@ -186,7 +186,7 @@ namespace AoC.Year2019.Day24
                                 {
                                     newState[cell] = false;
                                 } else
-                                if (state.TryGetValue(cell, out var c) ? c : false)
+                                if (state[cell])
                                 {
                                     if (numAdjacent == 1)
                                     {
@@ -215,7 +215,7 @@ namespace AoC.Year2019.Day24
                     return newState;
                 }
 
-                void Dump(Dictionary<(int, int, int), bool> state)
+                void Dump(DefaultDictionary<(int, int, int), bool> state)
                 {
                     var levels = state.Where(i => i.Value).Select(i => i.Key.Item3).Distinct().ToList();
                     var mnLevel = levels.Min();
@@ -245,7 +245,7 @@ namespace AoC.Year2019.Day24
                     }
                 }
 
-                long getTotal(Dictionary<(int, int, int), bool> state)
+                long getTotal(DefaultDictionary<(int, int, int), bool> state)
                 {
                     return state.Count(i => i.Value);
                 }
@@ -253,7 +253,7 @@ namespace AoC.Year2019.Day24
                 // 33m20s - 53rd
                 for (var i=0; i< cycles; i++)
                 {
-                    Console.WriteLine($"Calculating cycle {i} - have {state.Where(ii => ii.Value).Select(ii => ii.Key.Item3).Distinct().Count()} levels with something in it");
+                    //Console.WriteLine($"Calculating cycle {i} - have {state.Where(ii => ii.Value).Select(ii => ii.Key.Item3).Distinct().Count()} levels with something in it");
                     state = getNextState(state);
                     //Dump(state);
                 }

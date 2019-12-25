@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AOC;
 
 namespace AoC
 {
@@ -79,6 +80,11 @@ namespace AoC
             {
                 return (value % mod + mod) % mod;
             }
+        }
+
+        public static DefaultDictionary<K, V> WithDefault<K, V>(this IDictionary<K, V> inner, V defaultValue)
+        {
+            return new DefaultDictionary<K, V>(inner, defaultValue);
         }
     }
 }

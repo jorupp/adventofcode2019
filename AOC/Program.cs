@@ -7,6 +7,8 @@ namespace AoC
     {
         static void Main(string[] args)
         {
+            new Year2016.Day22.Part1().Run();
+
             //new Year2015.Day22.Part1().Run();
             //new Year2015.Day22.Part2().Run();
 
@@ -98,7 +100,7 @@ namespace AoC
             //new Year2019.Day24.Part1().Run();
             //new Year2019.Day24.Part2().Run();
 
-            new Year2019.Day25.Part1().Run();
+            //new Year2019.Day25.Part1().Run();
 
             if (Debugger.IsAttached)
             {

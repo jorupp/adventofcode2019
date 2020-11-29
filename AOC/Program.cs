@@ -7,7 +7,9 @@ namespace AoC
     {
         static void Main(string[] args)
         {
-            new Year2016.Day22.Part1().Run();
+            //new Year2015.Day9.Part1().Run();
+            new Year2015.Day9.Part2().Run();
+            //new Year2016.Day22.Part1().Run();
 
             //new Year2015.Day22.Part1().Run();
             //new Year2015.Day22.Part2().Run();

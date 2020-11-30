@@ -38,6 +38,24 @@ namespace AoC.Year2015.Day22
         public bool RechargeActive;
         public bool IsPlayerTurn;
         public Tuple<GameNode, string> Parent;
+
+        public IEnumerable<Tuple<GameNode, string>> GetParents()
+        {
+            if (Parent == null)
+            {
+                yield break;
+            }
+
+            if (Parent.Item1 != null)
+            {
+                foreach (var x in Parent.Item1.GetParents())
+                {
+                    yield return x;
+                }
+            }
+            yield return Parent;
+        }
+
         public GameNode() { }
         public GameNode(GameNode parent, string change)
         {

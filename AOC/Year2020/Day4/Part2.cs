@@ -49,121 +49,77 @@ namespace AoC.Year2020.Day4
             });
         }
 
-        private bool IsValid(Dictionary<string, string> p)
+        Dictionary<string, Func<string, bool>> rules = new Dictionary<string, Func<string, bool>>
         {
-
-            if (p.TryGetValue("byr", out var byr))
             {
-                var i = int.Parse(byr);
-                if (!(1920 <= i && i <= 2002))
+                "byr", (byr) =>
                 {
-                    Console.WriteLine($"byr invalid: {byr}");
-                    return false;
+                    var i = int.Parse(byr);
+                    return (1920 <= i && i <= 2002);
                 }
-            }
-            else
+            },
             {
-                Console.WriteLine($"byr missing");
-                return false;
-            }
-
-            if (p.TryGetValue("iyr", out var iyr))
-            {
-                var i = int.Parse(iyr);
-                if (!(2010 <= i && i <= 2020))
+                "iyr", (iyr) =>
                 {
-                    Console.WriteLine($"iyr invalid: {iyr}");
-                    return false;
+                    var i = int.Parse(iyr);
+                    return 2010 <= i && i <= 2020;
                 }
-            }
-            else
+            },
             {
-                Console.WriteLine($"iyr missing");
-                return false;
-            }
-
-            if (p.TryGetValue("eyr", out var eyr))
-            {
-                var i = int.Parse(eyr);
-                if (!(2020 <= i && i <= 2030))
+                "eyr", (eyr) =>
                 {
-                    Console.WriteLine($"eyr invalid: {eyr}");
-
-                    return false;
+                    var i = int.Parse(eyr);
+                    return 2020 <= i && i <= 2030;
                 }
-            }
-            else
+            },
             {
-                Console.WriteLine($"eyr missing");
-                return false;
-            }
-
-            if (p.TryGetValue("hgt", out var hgt))
-            {
-                if (hgt.EndsWith("cm"))
+                "hgt", (hgt) =>
                 {
-                    var i = int.Parse(hgt.Substring(0, hgt.Length - 2));
-                    if (!(150 <= i && i <= 193))
+                    if (hgt.EndsWith("cm"))
+                    {
+                        var i = int.Parse(hgt.Substring(0, hgt.Length - 2));
+                        return 150 <= i && i <= 193;
+
+                    }else
+                    if (hgt.EndsWith("in"))
+                    {
+                        var i = int.Parse(hgt.Substring(0, hgt.Length - 2));
+                        return 59 <= i && i <= 76;
+                    }
+                    else
                     {
                         return false;
                     }
+                }
+            },
+            {
+                "hcl", (hcl) => new Regex("^#[0-9a-f]{6}$").IsMatch(hcl)
+            },
+            {
+                "ecl", (ecl) =>new[] { "amb", "blu", "brn", "gry", "grn", "hzl", "oth" }.Contains(ecl)
+            },
+            {
+                "pid", (pid) => new Regex("^\\d{9}$").IsMatch(pid)
+            },
+        };
 
-                }else 
-                if (hgt.EndsWith("in"))
+        private bool IsValid(Dictionary<string, string> p)
+        {
+            foreach (var kvp in rules)
+            {
+                if (p.TryGetValue(kvp.Key, out var v))
                 {
-                    var i = int.Parse(hgt.Substring(0, hgt.Length - 2));
-                    if (!(59 <= i && i <= 76))
+                    if (!kvp.Value(v))
                     {
+                        Console.WriteLine($"{kvp.Key} invalid: {v}");
                         return false;
                     }
                 }
                 else
                 {
+                    Console.WriteLine($"{kvp.Key} missing");
                     return false;
                 }
-            }
-            else
-            {
-                Console.WriteLine($"hgt missing");
-                return false;
-            }
-
-
-            if (p.TryGetValue("hcl", out var hcl))
-            {
-                if (!new Regex("^#[0-9a-f]{6}$").IsMatch(hcl))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-
-            if (p.TryGetValue("ecl", out var ecl))
-            {
-                if (!new[] { "amb", "blu", "brn", "gry", "grn", "hzl", "oth" }.Contains(ecl))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
-            }
-
-
-            if (p.TryGetValue("pid", out var pid))
-            {
-                if (!new Regex("^\\d{9}$").IsMatch(pid))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                return false;
             }
 
             return true;

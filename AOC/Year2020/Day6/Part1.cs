@@ -9,13 +9,7 @@ namespace AoC.Year2020.Day6
         {
             RunScenario(title, () =>
             {
-                var groups = input.Split("\r\n\r\n");
-                //var people = groups.Select(i => i.Split("\r\n")).ToArray();
-
-                var x = groups.Select(i => i.ToLower().Distinct().Where(i => 'a' <= i && i <= 'z').Count()).Sum();
-
-
-                Console.WriteLine(x);
+                Console.WriteLine(input.Split("\r\n\r\n").Select(i => i.ToLower().Distinct().Where(char.IsLetter).Count()).Sum());
             });
         }
 

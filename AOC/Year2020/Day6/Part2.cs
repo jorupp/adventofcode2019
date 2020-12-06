@@ -9,16 +9,15 @@ namespace AoC.Year2020.Day6
         {
             RunScenario(title, () =>
             {
-                var groups = input.Split("\r\n\r\n");
-                var people = groups.Select(i => i.Split("\r\n")).ToArray();
-                var r = 0;
-                foreach (var g in people)
-                {
-                    var x = g.Aggregate("qwertyuiopasdfghjklzxcvbnm".ToList(), (a, b) => a.Intersect(b).ToList()).Count();
-                    r += x;
-                }
+                var q = (from g in input.Split("\r\n\r\n")
+                        select g.Split("\r\n")
+                            .Aggregate(
+                                "qwertyuiopasdfghjklzxcvbnm".ToList(),
+                                (a, b) => a.Intersect(b).ToList()
+                            ).Count()
+                    ).Sum();
 
-                Console.WriteLine(r);
+                Console.WriteLine(q);
             });
         }
 

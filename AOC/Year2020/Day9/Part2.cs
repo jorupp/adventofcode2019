@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace AoC.Year2020.Day9
@@ -10,6 +11,7 @@ namespace AoC.Year2020.Day9
             RunScenarioReallySlow(title + "-reallyslow", input, target);
             RunScenarioSlow(title + "-slow", input, target);
             RunScenarioFast(title + "-fast", input, target);
+            RunScenarioSuperFast(title + "-superfast", input, target);
         }
 
 
@@ -102,6 +104,34 @@ namespace AoC.Year2020.Day9
                     }
                 }
 
+            });
+        }
+
+        // inspired by the mention of a queue on https://www.reddit.com/r/adventofcode/comments/k9lfwj/2020_day_09_solutions/gf53mzy/
+        protected void RunScenarioSuperFast(string title, string input, long target)
+        {
+            RunScenario(title, () =>
+            {
+                var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToList();
+
+                var items = new Queue<long>();
+                long sum = 0;
+
+                foreach (var i in lines)
+                {
+                    items.Enqueue(i);
+                    sum += i;
+                    while (sum > target)
+                    {
+                        sum -= items.Dequeue();
+                    }
+                    if (target == sum && items.Count > 1)
+                    {
+                        var min = items.Min();
+                        var max = items.Max();
+                        Console.WriteLine($"{min} + {max} = {min + max}");
+                    }
+                }
             });
         }
 

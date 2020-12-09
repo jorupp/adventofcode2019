@@ -114,17 +114,23 @@ namespace AoC.Year2020.Day9
             {
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToList();
 
+                // start out with an empty queue and 0 sum
                 var items = new Queue<long>();
                 long sum = 0;
 
                 foreach (var i in lines)
                 {
+                    // add a new item to the queue and add it to the sum
                     items.Enqueue(i);
                     sum += i;
+
                     while (sum > target)
                     {
+                        // sum is too big - remove the earliest items from the queue
                         sum -= items.Dequeue();
                     }
+
+                    // see if we've hit the sum we're aiming for
                     if (target == sum && items.Count > 1)
                     {
                         var min = items.Min();

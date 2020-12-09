@@ -7,6 +7,14 @@ namespace AoC.Year2020.Day9
     {
         protected void RunScenario(string title, string input, long target)
         {
+            RunScenarioReallySlow(title + "-reallyslow", input, target);
+            RunScenarioSlow(title + "-slow", input, target);
+            RunScenarioFast(title + "-fast", input, target);
+        }
+
+
+        protected void RunScenarioReallySlow(string title, string input, long target)
+        {
             RunScenario(title, () =>
             {
                 var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToList();
@@ -32,6 +40,68 @@ namespace AoC.Year2020.Day9
                 }
 
                 // 4574407 is wrong
+            });
+        }
+
+        protected void RunScenarioSlow(string title, string input, long target)
+        {
+            RunScenario(title, () =>
+            {
+                var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToList();
+
+                for (var i = 0; i < lines.Count; i++)
+                {
+                    for (var j = 2; j < lines.Count - i; j++)
+                    {
+                        var range = lines.Skip(i).Take(j).ToList();
+                        var x = range.Sum();
+                        if (x > target)
+                        {
+                            break;
+                        }
+                        if (target == x)
+                        {
+                            var min = range.Min();
+                            var max = range.Max();
+                            Console.WriteLine($"{i} {j}");
+                            Console.WriteLine($"{min} + {max} = {min + max}");
+                        }
+                    }
+                }
+
+                // 4574407 is wrong
+            });
+        }
+
+        protected void RunScenarioFast(string title, string input, long target)
+        {
+            RunScenario(title, () =>
+            {
+                var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries).Select(long.Parse).ToList();
+
+                for (var j = 2; j < lines.Count; j++)
+                {
+                    var sum = lines.Take(j).Sum();
+                    void doCheck(int i)
+                    {
+                        if (target == sum)
+                        {
+                            var range = lines.Skip(i).Take(j).ToList();
+                            var min = range.Min();
+                            var max = range.Max();
+                            Console.WriteLine($"{i} {j}");
+                            Console.WriteLine($"{min} + {max} = {min + max}");
+                        }
+                    }
+                    doCheck(0);
+                    for (var i = 1; i < lines.Count - j; i++)
+                    {
+                        sum -= lines[i-1];
+                        sum += lines[i + j-1];
+                        doCheck(i);
+                    }
+                }
+
             });
         }
 

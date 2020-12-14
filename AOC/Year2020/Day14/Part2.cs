@@ -53,7 +53,7 @@ namespace AoC.Year2020.Day14
 
                         index |= mask1;
 
-                        Console.WriteLine($"Evaluating {maskFlips.Count} flips");
+                        //Console.WriteLine($"Evaluating {maskFlips.Count} flips");
                         foreach (var i in maskFlips.Select(x => index ^ x))
                         {
                             //Console.WriteLine($"Writing to {i}");

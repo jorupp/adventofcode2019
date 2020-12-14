@@ -18,21 +18,23 @@ namespace AoC.Year2020.Day14
 
                 var mem = new Dictionary<long, long>();
                 long mask1 = 0;
-                var maskFlips = new List<long>();
+                // maskFlips will be a series of bitmasks to XOR with the parsed index value
+                var maskFlips = new List<long>() { 0 };
                 foreach (var line in lines)
                 {
                     var m1 = re1.Matches(line);
                     if (m1.Count == 1)
                     {
                         mask1 = 0;
-                        maskFlips = new List<long>();
+                        maskFlips = new List<long>() { 0 };
                         var v = m1[0].Groups[1].Value.Reverse().ToList();
                         for (var i = 0; i < v.Count; i++)
                         {
                             if (v[i] == 'X')
                             {
-                                // flip the ith bit
-                                maskFlips.Add(1L << i);
+                                // flip (and don't flip) the ith bit
+                                var flipBit = 1L << i;
+                                maskFlips = maskFlips.Concat(maskFlips.Select(x => x ^ flipBit)).ToList();
                             }
                             if (v[i] == '1')
                             {
@@ -42,22 +44,17 @@ namespace AoC.Year2020.Day14
                             }
                         }
 
-                        //Console.WriteLine($"New mask1: {Convert.ToString(mask1, 2).PadLeft(64, '0')}");
-                        //Console.WriteLine($"New mask0: {Convert.ToString(mask0, 2).PadLeft(64, '0')}");
                     }
                     else
                     {
                         var m2 = re2.Match(line);
                         var index = long.Parse(m2.Groups[1].Value);
                         var value = long.Parse(m2.Groups[2].Value);
-                        //value = (value | mask1) & mask0;
 
                         index |= mask1;
 
                         Console.WriteLine($"Evaluating {maskFlips.Count} flips");
-                        var indexes = GenerateValues(index, maskFlips).ToList();
-                        Console.WriteLine($"Writing to {indexes.Count} indexes");
-                        foreach (var i in indexes)
+                        foreach (var i in maskFlips.Select(x => index ^ x))
                         {
                             //Console.WriteLine($"Writing to {i}");
                             mem[i] = value;

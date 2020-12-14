@@ -31,6 +31,7 @@ namespace AoC.Year2020.Day13
                 // where lcm is the least common multiple of the bus numbers so far
                 long value = 0;
                 long lcm = withFormulas[0].increment;
+                var trial = 0;
 
                 foreach (var withFormula in withFormulas.Skip(1))
                 {
@@ -42,6 +43,7 @@ namespace AoC.Year2020.Day13
                     while (!withFormula.formula(value))
                     {
                         value += lcm;
+                        trial++;
                     }
 
                     // value works for this bus.  to make sure our next solutions work for this bus, we need to merge this bus's increment with the LCM we have already
@@ -51,6 +53,7 @@ namespace AoC.Year2020.Day13
                 }
 
                 Console.WriteLine(value);
+                Console.WriteLine($"trials: {trial}");
 
             });
         }

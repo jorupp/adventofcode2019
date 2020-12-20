@@ -65,8 +65,8 @@ namespace AoC
             //new Year2020.Day19.Part1().Run();
             //new Year2020.Day19.Part2().Run();
 
-            new Year2020.Day20.Part1().Run();
-            //new Year2020.Day20.Part2().Run();
+            //new Year2020.Day20.Part1().Run();
+            new Year2020.Day20.Part2().Run();
 
             if (Debugger.IsAttached)
             {

@@ -101,7 +101,50 @@ namespace AoC.Year2020.Day20
 
                 Console.WriteLine(parts.Aggregate(1L, (a, b) => a * b));
 
+                var tileSize = tileData.First().Value.Length;
+                var map = Enumerable.Range(0, (tileSize - 1) * w + 1).Select(y =>
+                    Enumerable.Range(0, (tileSize - 1) * w + 1).Select(x => ' ').ToArray()).ToArray();
 
+                for (var i = 0; i < placed.Count; i++)
+                {
+                    var sx = (i % w) * (tileSize - 1);
+                    var sy = (i / w) * (tileSize - 1);
+                    var tile = placed[i];
+
+                    //var originalImage = GetMapImage(tileData[tile.Item1], 0);
+                    var tileMapImage = GetMapImage(tileData[tile.Item1], tile.Item2);
+                    //Write($"Original {tile.Item1}", originalImage);
+                    //Write($"Rotated {tile.Item1} to {tile.Item2}", tileMapImage);
+
+                    for (var y = 0; y < tileSize; y++)
+                    {
+                        var ty = sy + y;
+                        for (var x = 0; x < tileSize; x++)
+                        {
+                            var tx = sx + x;
+                            var tmap = map[ty][tx];
+                            var smap = tileMapImage[y][x];
+                            if (tmap != ' ' && tmap != smap)
+                            {
+                                Console.WriteLine($"Mismatch - '{tmap}' != '{smap}' @ {i} -> {x},{y} / {tx},{ty}");
+                                map[ty][tx] = 'X';
+                            }
+                            else
+                            {
+                                map[ty][tx] = smap;
+                            }
+                        }
+                    }
+                }
+
+                //Write("map", map);
+                //map = RemoveBorder(map);
+                //Write("border free map", map);
+
+                ////var count = FindMaxMonsters(map);
+                //var map12 = GetMapImage(map, 7);
+                //Write("map12", map12);
+                //var count = FindMonsters(map12);
 
                 // 9 
                 // 144
@@ -116,8 +159,107 @@ namespace AoC.Year2020.Day20
                 //  need to store top/bottom/left/right pattern for each
                 // tiles are 10x10
 
-                Console.WriteLine(tileData.Count);
+                //Console.WriteLine(count);
             });
+        }
+
+        private int FindMaxMonsters(char[][] map)
+        {
+            return Enumerable.Range(0, 16).Max(i =>
+            {
+                Console.WriteLine($"Searching rotation {i}");
+                return FindMonsters(GetMapImage(map, i));
+            });
+        }
+
+        private char[][] RemoveBorder(char[][] input)
+        {
+            return Enumerable.Range(0, input.Length - 2)
+                .Select(r => Enumerable.Range(0, input.Length - 2).Select(c => input[r + 1][c + 1]).ToArray()).ToArray();
+        }
+
+        private int FindMonsters(char[][] map)
+        {
+            // clone
+            map = map.Select(i => i.ToArray()).ToArray();
+            var monster = @"                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   ".Replace("\r\n", "\n").Split("\n").Select(i => i.ToArray()).ToArray();
+
+            Write("monster", monster);
+
+
+            var monsterStart = new List<(int, int)>();
+
+            for (var sy = 0; sy < map.Length - monster.Length; sy++)
+            {
+                for (var sx = 0; sx < map.Length - monster[0].Length; sx++)
+                {
+                    for (var y = 0; y < monster.Length; y++)
+                    {
+                        for (var x = 0; x < monster[0].Length; x++)
+                        {
+                            if (monster[y][x] == '#')
+                            {
+                                Console.WriteLine($"Checking {sx},{sy} @ {x},{y}: {map[sy + y][sx + x]} =?= {monster[y][x]} - {sy + y},{sx + x}");
+                                if (map[sy + y][sx + x] != '#')
+                                {
+                                    Console.WriteLine($"No monster at {sx},{sy} @ {x},{y}: {map[sy + y][sx + x]} != {monster[y][x]}");
+                                    goto nextOne;
+                                }
+                            }
+                        }
+                    }
+
+                    Console.WriteLine("Found monster");
+                    monsterStart.Add((sy, sx));
+
+                    nextOne:
+                    continue;
+
+                }
+            }
+
+            // draw the monster
+
+            foreach (var m in monsterStart)
+            {
+                var sy = m.Item1;
+                var sx = m.Item2;
+
+                for (var y = 0; y < monster.Length; y++)
+                {
+                    for (var x = 0; x < monster[0].Length; x++)
+                    {
+                        if (monster[y][x] == '#')
+                        {
+                            map[sy + y][sx + x] = 'O';
+                        }
+                    }
+                }
+            }
+
+            if (monsterStart.Count == 0)
+            {
+                return 0;
+            }
+
+            Write($"With {monsterStart.Count} monsters:", map);
+
+            return map.Sum(i => i.Count(ii => ii == '#'));
+        }
+
+        private void Write(string label, char[][] map)
+        {
+            Console.WriteLine(label);
+            for (var y = 0; y < map.Length; y++)
+            {
+                for (var x = 0; x < map[y].Length; x++)
+                {
+                    Console.Write(map[y][x]);
+                }
+                Console.WriteLine();
+            }
         }
 
         private class MapNode : Node<MapNode, string, int>
@@ -147,6 +289,11 @@ namespace AoC.Year2020.Day20
                     remaining = remaining.Intersect(_corners).ToList();
                 }
                 var directions = Enumerable.Range(0, 16).Select(i => (short)i).ToList();
+                //if (_placed.Count == 0)
+                //{
+                //    directions = new List<short>() {8};
+                //    remaining = new List<int>() {1951};
+                //}
 
                 if (_placed.Count > 0)
                 {
@@ -258,41 +405,54 @@ namespace AoC.Year2020.Day20
             }
 
             var size = input.Length;
+            if (input.Any(i => i.Length != size))
+            {
+                throw new ArgumentException($"{size}");
+            }
+
+            while (change % 4 > 0)
+            {
+                input = Enumerable.Range(0, size)
+                    .Select(
+                        r => Enumerable.Range(0, size)
+                            .Select(
+                                c => input[c][size - r - 1]).ToArray()
+                    ).ToArray();
+                //Console.WriteLine($"Rotated {change}");
+                change -= 1;
+            }
+
 
             if ((change & 4) == 4)
             {
-                return GetMapImage(Enumerable.Range(0, size)
-                        .Select(
-                            r => Enumerable.Range(0, size)
-                                .Select(
-                                    c => input[r][size - c]).ToArray()
-                        ).ToArray(), change - 4);
+                input = Enumerable.Range(0, size)
+                    .Select(
+                        r => Enumerable.Range(0, size)
+                            .Select(
+                                c => input[r][size - c - 1]).ToArray()
+                    ).ToArray();
+                //Console.WriteLine($"H Fliped {change}");
+                change -= 4;
             }
 
             if ((change & 8) == 8)
             {
-                return GetMapImage(Enumerable.Range(0, size)
-                        .Select(
-                            r => Enumerable.Range(0, size)
-                                .Select(
-                                    c => input[size - r][c]).ToArray()
-                        ).ToArray(), change - 8);
-            }
-
-            if (change == 1)
-            {
-                return Enumerable.Range(0, size)
+                input = Enumerable.Range(0, size)
                     .Select(
                         r => Enumerable.Range(0, size)
                             .Select(
-                                c => input[c][size - r]).ToArray()
+                                c => input[size - r - 1][c]).ToArray()
                     ).ToArray();
+                //Console.WriteLine($"V Fliped {change}");
+                change -= 8;
             }
 
-            if (change == 2 || change == 3)
+            if (change != 0)
             {
-                return GetMapImage(input, change - 1);
+                throw new NotImplementedException(change.ToString());
             }
+
+            return input;
         }
 
         private char[][] Rotate(char[][] input)

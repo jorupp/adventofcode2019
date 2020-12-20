@@ -102,13 +102,13 @@ namespace AoC.Year2020.Day20
                 Console.WriteLine(parts.Aggregate(1L, (a, b) => a * b));
 
                 var tileSize = tileData.First().Value.Length;
-                var map = Enumerable.Range(0, (tileSize - 1) * w + 1).Select(y =>
-                    Enumerable.Range(0, (tileSize - 1) * w + 1).Select(x => ' ').ToArray()).ToArray();
+                var map = Enumerable.Range(0, (tileSize - 2) * w).Select(y =>
+                    Enumerable.Range(0, (tileSize - 2) * w).Select(x => ' ').ToArray()).ToArray();
 
                 for (var i = 0; i < placed.Count; i++)
                 {
-                    var sx = (i % w) * (tileSize - 1);
-                    var sy = (i / w) * (tileSize - 1);
+                    var sx = (i % w) * (tileSize - 2) - 1;
+                    var sy = (i / w) * (tileSize - 2) - 1;
                     var tile = placed[i];
 
                     //var originalImage = GetMapImage(tileData[tile.Item1], 0);
@@ -116,32 +116,32 @@ namespace AoC.Year2020.Day20
                     //Write($"Original {tile.Item1}", originalImage);
                     //Write($"Rotated {tile.Item1} to {tile.Item2}", tileMapImage);
 
-                    for (var y = 0; y < tileSize; y++)
+                    for (var y = 1; y < tileSize - 1; y++)
                     {
                         var ty = sy + y;
-                        for (var x = 0; x < tileSize; x++)
+                        for (var x = 1; x < tileSize - 1; x++)
                         {
                             var tx = sx + x;
-                            var tmap = map[ty][tx];
+                            //var tmap = map[ty][tx];
                             var smap = tileMapImage[y][x];
-                            if (tmap != ' ' && tmap != smap)
-                            {
-                                Console.WriteLine($"Mismatch - '{tmap}' != '{smap}' @ {i} -> {x},{y} / {tx},{ty}");
-                                map[ty][tx] = 'X';
-                            }
-                            else
-                            {
+                            //if (tmap != ' ' && tmap != smap)
+                            //{
+                            //    Console.WriteLine($"Mismatch - '{tmap}' != '{smap}' @ {i} -> {x},{y} / {tx},{ty}");
+                            //    map[ty][tx] = 'X';
+                            //}
+                            //else
+                            //{
                                 map[ty][tx] = smap;
-                            }
+                            //}
                         }
                     }
                 }
 
-                //Write("map", map);
+                Write("map", map);
                 //map = RemoveBorder(map);
                 //Write("border free map", map);
 
-                ////var count = FindMaxMonsters(map);
+                var count = FindMaxMonsters(map);
                 //var map12 = GetMapImage(map, 7);
                 //Write("map12", map12);
                 //var count = FindMonsters(map12);
@@ -159,7 +159,7 @@ namespace AoC.Year2020.Day20
                 //  need to store top/bottom/left/right pattern for each
                 // tiles are 10x10
 
-                //Console.WriteLine(count);
+                Console.WriteLine(count);
             });
         }
 
@@ -186,7 +186,7 @@ namespace AoC.Year2020.Day20
 #    ##    ##    ###
  #  #  #  #  #  #   ".Replace("\r\n", "\n").Split("\n").Select(i => i.ToArray()).ToArray();
 
-            Write("monster", monster);
+            //Write("monster", monster);
 
 
             var monsterStart = new List<(int, int)>();
@@ -201,17 +201,17 @@ namespace AoC.Year2020.Day20
                         {
                             if (monster[y][x] == '#')
                             {
-                                Console.WriteLine($"Checking {sx},{sy} @ {x},{y}: {map[sy + y][sx + x]} =?= {monster[y][x]} - {sy + y},{sx + x}");
+                                //Console.WriteLine($"Checking {sx},{sy} @ {x},{y}: {map[sy + y][sx + x]} =?= {monster[y][x]} - {sy + y},{sx + x}");
                                 if (map[sy + y][sx + x] != '#')
                                 {
-                                    Console.WriteLine($"No monster at {sx},{sy} @ {x},{y}: {map[sy + y][sx + x]} != {monster[y][x]}");
+                                    //Console.WriteLine($"No monster at {sx},{sy} @ {x},{y}: {map[sy + y][sx + x]} != {monster[y][x]}");
                                     goto nextOne;
                                 }
                             }
                         }
                     }
 
-                    Console.WriteLine("Found monster");
+                    //Console.WriteLine("Found monster");
                     monsterStart.Add((sy, sx));
 
                     nextOne:
@@ -291,8 +291,8 @@ namespace AoC.Year2020.Day20
                 var directions = Enumerable.Range(0, 16).Select(i => (short)i).ToList();
                 //if (_placed.Count == 0)
                 //{
-                //    directions = new List<short>() {8};
-                //    remaining = new List<int>() {1951};
+                //    directions = new List<short>() { 8 };
+                //    remaining = new List<int>() { 1951 };
                 //}
 
                 if (_placed.Count > 0)

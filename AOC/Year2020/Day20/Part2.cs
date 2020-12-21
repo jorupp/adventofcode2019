@@ -251,6 +251,7 @@ namespace AoC.Year2020.Day20
 
         private void Write(string label, char[][] map)
         {
+            return;
             Console.WriteLine(label);
             for (var y = 0; y < map.Length; y++)
             {

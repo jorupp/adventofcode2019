@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace AoC.Year2020.Day0
+namespace AoC.Year2020.Day23
 {
     public class Part1 : BasePart
     {

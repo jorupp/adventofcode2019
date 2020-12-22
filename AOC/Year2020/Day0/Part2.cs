@@ -9,7 +9,7 @@ namespace AoC.Year2020.Day0
         {
             RunScenario(title, () =>
             {
-                var lines = input.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                var lines = input.Replace("\r\n", "\n").Split("\n", StringSplitOptions.RemoveEmptyEntries);
 
                 Console.WriteLine(lines.Length);
             });

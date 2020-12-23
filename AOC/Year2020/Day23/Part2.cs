@@ -8,27 +8,35 @@ namespace AoC.Year2020.Day23
     {
         private interface IResult { }
 
-        private class GetValueCall : IResult
+        private abstract class Call : IResult
         {
-            public int Step;
-            public int Index;
+            public Func<int, int> After;
 
-            public GetValueCall(int index, int step)
+        }
+
+        private class GetValueCall : Call
+        {
+            public int Index;
+            public int Step;
+
+            public GetValueCall(int index, int step, Func<int, int> after = null)
             {
-                Step = step;
                 Index = index;
+                Step = step;
+                After = after;
             }
         }
 
-        private class GetIndexCall : IResult
+        private class GetIndexCall : Call
         {
-            public int Step;
             public int Value;
+            public int Step;
 
-            public GetIndexCall(int value, int step)
+            public GetIndexCall(int value, int step, Func<int, int> after = null)
             {
-                Step = step;
                 Value = value;
+                Step = step;
+                After = after;
             }
         }
 
@@ -55,11 +63,26 @@ namespace AoC.Year2020.Day23
 
                 int evaluate(IResult result)
                 {
+                    var stack = new Stack<IResult>();
                     while(true)
                     {
+                        stack.Push(result);
                         if (result is ResultValue val)
                         {
-                            return val.Value;
+                            stack.Pop();
+                            var v = val.Value;
+                            while (stack.Count > 0)
+                            {
+                                var r = stack.Pop();
+                                if (r is Call c)
+                                {
+                                    if(c.After != null)
+                                    {
+                                        v = c.After(v);
+                                    }
+                                }
+                            }
+                            return v;
                         }
                         else if (result is GetIndexCall iCall)
                         {
@@ -183,40 +206,44 @@ namespace AoC.Year2020.Day23
                         pDestinationIx = evaluate(getIndex(pDestination, step - 1));
                     }
 
-                    return (value) =>
+                    Func<int, int> after = (pIx) =>
                     {
-                        var pIx = evaluate(getIndex(value, step - 1));
                         if (pIx == 0)
                         {
-                            return new ResultValue(data.Count - 1);
+                            return data.Count - 1;
                         }
                         if (pIx == pDestinationIx)
                         {
-                            return new ResultValue(pDestinationIx - 4);
+                            return pDestinationIx - 4;
                         }
                         if (pIx == 1)
                         {
-                            return new ResultValue(pDestinationIx - 3);
+                            return pDestinationIx - 3;
                         }
                         if (pIx == 2)
                         {
-                            return new ResultValue(pDestinationIx - 2);
+                            return pDestinationIx - 2;
                         }
                         if (pIx == 3)
                         {
-                            return new ResultValue(pDestinationIx - 1);
+                            return pDestinationIx - 1;
                         }
 
                         if (pIx < pDestinationIx)
                         {
-                            return new ResultValue(pIx - 4);
+                            return pIx - 4;
                         }
                         if (pIx > pDestinationIx)
                         {
-                            return new ResultValue(pIx - 1);
+                            return pIx - 1;
                         }
 
-                        throw new InvalidOperationException($"Couldn't determine index for {value} w/ {pDestinationIx}");
+                        throw new InvalidOperationException($"Couldn't determine index for {pDestinationIx}");
+                    };
+
+                    return (value) =>
+                    {
+                        return new GetIndexCall(value, step - 1, after);
                     };
                 }
 

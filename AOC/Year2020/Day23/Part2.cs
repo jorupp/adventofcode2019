@@ -14,8 +14,8 @@ namespace AoC.Year2020.Day23
                 data = data.Concat(Enumerable.Range(data.Count + 1, padding - data.Count)).ToList();
 
 
-                var valueCache = new Dictionary<(int, int), int>();
-                var indexCache = new Dictionary<(int, int), int>();
+                var valueCache = new Dictionary<int, Func<int, int>>();
+                var indexCache = new Dictionary<int, Func<int, int>>();
 
                 int getValue(int index, int step)
                 {
@@ -24,47 +24,39 @@ namespace AoC.Year2020.Day23
                         return data[index];
                     }
 
-                    var key = (index, step);
-                    if (valueCache.TryGetValue(key, out var v))
+                    if (valueCache.TryGetValue(step, out var v))
                     {
-                        return v;
+                        return v(index);
                     }
                     else
                     {
-                        var v2 = _getValue(index, step);
-                        valueCache[key] = v2;
-                        indexCache[(v2, step)] = index;
-                        return v2;
+                        var v2 = _getValueFunction(step);
+                        valueCache[step] = v2;
+                        return v2(index);
                     }
                 }
 
                 int getIndex(int value, int step)
                 {
-                    var key = (value, step);
-                    if (indexCache.TryGetValue(key, out var v))
+                    if (indexCache.TryGetValue(step, out var v))
                     {
-                        return v;
+                        return v(value);
                     }
                     else
                     {
-                        var v2 = _getIndex(value, step);
-                        if (v2 < 0 || v2 >= data.Count)
-                        {
-                            throw new ArgumentException();
-                        }
-                        indexCache[key] = v2;
-                        valueCache[(v2, step)] = value;
-                        return v2;
+                        var v2 = _getIndexFunction(step);
+                        //if (v2 < 0 || v2 >= data.Count)
+                        //{
+                        //    throw new ArgumentException();
+                        //}
+                        indexCache[step] = v2;
+                        return v2(value);
                     }
                 }
 
-                int _getValue(int index, int step)
+                Func<int, int> _getValueFunction(int step)
                 {
                     var pCurrent = getValue(0, step - 1);
-                    if (index == data.Count - 1)
-                    {
-                        return pCurrent;
-                    }
 
                     var pDestination = (pCurrent - 2 + data.Count) % data.Count + 1;
                     var pDestinationIx = getIndex(pDestination, step - 1);
@@ -74,44 +66,45 @@ namespace AoC.Year2020.Day23
                         pDestinationIx = getIndex(pDestination, step - 1);
                     }
 
-                    if (index < pDestinationIx - 4)
+                    return (index) =>
                     {
-                        return getValue(index + 4, step - 1);
-                    }
-                    if (index == pDestinationIx - 4)
-                    {
-                        return pDestination;
-                    }
-                    if (index == pDestinationIx - 3)
-                    {
-                        return getValue(1, step - 1);
-                    }
-                    if (index == pDestinationIx - 2)
-                    {
-                        return getValue(2, step - 1);
-                    }
-                    if (index == pDestinationIx - 1)
-                    {
-                        return getValue(3, step - 1);
-                    }
-                    if(index >= pDestinationIx)
-                    {
-                        return getValue(index + 1, step - 1);
-                    }
-                    throw new InvalidOperationException($"Couldn't determine index to get value for {index} w/ {pDestinationIx}");
+                        if (index == data.Count - 1)
+                        {
+                            return pCurrent;
+                        }
+                        if (index < pDestinationIx - 4)
+                        {
+                            return getValue(index + 4, step - 1);
+                        }
+                        if (index == pDestinationIx - 4)
+                        {
+                            return pDestination;
+                        }
+                        if (index == pDestinationIx - 3)
+                        {
+                            return getValue(1, step - 1);
+                        }
+                        if (index == pDestinationIx - 2)
+                        {
+                            return getValue(2, step - 1);
+                        }
+                        if (index == pDestinationIx - 1)
+                        {
+                            return getValue(3, step - 1);
+                        }
+                        if (index >= pDestinationIx)
+                        {
+                            return getValue(index + 1, step - 1);
+                        }
+                        throw new InvalidOperationException($"Couldn't determine index to get value for {index} w/ {pDestinationIx}");
+                    };
                 }
 
-                int _getIndex(int value, int step)
+                Func<int, int> _getIndexFunction(int step)
                 {
                     if (step == 0)
                     {
-                        return data.IndexOf(value);
-                    }
-
-                    var pIx = getIndex(value, step - 1);
-                    if (pIx == 0)
-                    {
-                        return data.Count - 1;
+                        return (value) => data.IndexOf(value);
                     }
 
                     var pCurrent = getValue(0, step - 1);
@@ -124,33 +117,41 @@ namespace AoC.Year2020.Day23
                         pDestinationIx = getIndex(pDestination, step - 1);
                     }
 
-                    if (pIx == pDestinationIx)
+                    return (value) =>
                     {
-                        return pDestinationIx - 4;
-                    }
-                    if (pIx == 1)
-                    {
-                        return pDestinationIx - 3;
-                    }
-                    if (pIx == 2)
-                    {
-                        return pDestinationIx - 2;
-                    }
-                    if (pIx == 3)
-                    {
-                        return pDestinationIx - 1;
-                    }
+                        var pIx = getIndex(value, step - 1);
+                        if (pIx == 0)
+                        {
+                            return data.Count - 1;
+                        }
+                        if (pIx == pDestinationIx)
+                        {
+                            return pDestinationIx - 4;
+                        }
+                        if (pIx == 1)
+                        {
+                            return pDestinationIx - 3;
+                        }
+                        if (pIx == 2)
+                        {
+                            return pDestinationIx - 2;
+                        }
+                        if (pIx == 3)
+                        {
+                            return pDestinationIx - 1;
+                        }
 
-                    if (pIx < pDestinationIx)
-                    {
-                        return pIx - 4;
-                    }
-                    if (pIx > pDestinationIx)
-                    {
-                        return pIx - 1;
-                    }
+                        if (pIx < pDestinationIx)
+                        {
+                            return pIx - 4;
+                        }
+                        if (pIx > pDestinationIx)
+                        {
+                            return pIx - 1;
+                        }
 
-                    throw new InvalidOperationException($"Couldn't determine index for {value} w/ {pDestinationIx}");
+                        throw new InvalidOperationException($"Couldn't determine index for {value} w/ {pDestinationIx}");
+                    };
                 }
 
                 ////var check = new Dictionary<string, int>();
@@ -215,15 +216,15 @@ namespace AoC.Year2020.Day23
 
                 Console.WriteLine($"Answer: {answer}");
 
-                var keys = valueCache.Keys.OrderBy(i => i.Item2).ThenBy(i => i.Item1).ToList();
-                var groups = valueCache.Keys.GroupBy(i => i.Item2, i => i.Item2).OrderBy(i => i.Key).Select(i => new { i.Key, values = i.OrderBy(ii => ii).ToList() }).ToList();
+                //var keys = valueCache.Keys.OrderBy(i => i.Item2).ThenBy(i => i.Item1).ToList();
+                //var groups = valueCache.Keys.GroupBy(i => i.Item2, i => i.Item2).OrderBy(i => i.Key).Select(i => new { i.Key, values = i.OrderBy(ii => ii).ToList() }).ToList();
             });
         }
 
 
         public override void Run()
         {
-            RunScenario("initial", @"389125467", 1000000, 1000);
+            RunScenario("initial", @"389125467", 1000000, 10000);
 
             //RunScenario("initial", @"389125467", 9, 100);
             ////return;

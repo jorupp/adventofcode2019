@@ -214,6 +214,9 @@ namespace AoC.Year2020.Day23
                 var answer = v1 * v2;
 
                 Console.WriteLine($"Answer: {answer}");
+
+                var keys = valueCache.Keys.OrderBy(i => i.Item2).ThenBy(i => i.Item1).ToList();
+                var groups = valueCache.Keys.GroupBy(i => i.Item2, i => i.Item2).OrderBy(i => i.Key).Select(i => new { i.Key, values = i.OrderBy(ii => ii).ToList() }).ToList();
             });
         }
 

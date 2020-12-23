@@ -61,6 +61,10 @@ namespace AoC.Year2020.Day23
                 var valueCache = new Dictionary<int, Func<int, IResult>>();
                 var indexCache = new Dictionary<int, Func<int, IResult>>();
 
+                var cacheInterval = 1000;
+                var realValueCache = new Dictionary<int, int>();
+                var realIndexCache = new Dictionary<int, int>();
+
                 int evaluate(IResult result)
                 {
                     var stack = new Stack<IResult>();
@@ -86,6 +90,7 @@ namespace AoC.Year2020.Day23
                         }
                         else if (result is GetIndexCall iCall)
                         {
+                            // somehow cache every 1000 or whatever
                             result = getIndex(iCall.Value, iCall.Step);
                         }
                         else if (result is GetValueCall vCall)

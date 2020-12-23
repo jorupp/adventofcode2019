@@ -6,6 +6,43 @@ namespace AoC.Year2020.Day23
 {
     public class Part2 : BasePart
     {
+        private interface IResult { }
+
+        private class GetValueCall : IResult
+        {
+            public int Step;
+            public int Index;
+
+            public GetValueCall(int index, int step)
+            {
+                Step = step;
+                Index = index;
+            }
+        }
+
+        private class GetIndexCall : IResult
+        {
+            public int Step;
+            public int Value;
+
+            public GetIndexCall(int value, int step)
+            {
+                Step = step;
+                Value = value;
+            }
+        }
+
+        private class ResultValue : IResult
+        {
+            public int Value;
+
+            public ResultValue(int value)
+            {
+                Value = value;
+            }
+        }
+
+
         protected void RunScenario(string title, string input, int padding, int count)
         {
             RunScenario(title, () =>
@@ -13,15 +50,33 @@ namespace AoC.Year2020.Day23
                 var data = input.Select(i => int.Parse(i.ToString())).ToList();
                 data = data.Concat(Enumerable.Range(data.Count + 1, padding - data.Count)).ToList();
 
+                var valueCache = new Dictionary<int, Func<int, IResult>>();
+                var indexCache = new Dictionary<int, Func<int, IResult>>();
 
-                var valueCache = new Dictionary<int, Func<int, int>>();
-                var indexCache = new Dictionary<int, Func<int, int>>();
+                int evaluate(IResult result)
+                {
+                    while(true)
+                    {
+                        if (result is ResultValue val)
+                        {
+                            return val.Value;
+                        }
+                        else if (result is GetIndexCall iCall)
+                        {
+                            result = getIndex(iCall.Value, iCall.Step);
+                        }
+                        else if (result is GetValueCall vCall)
+                        {
+                            result = getValue(vCall.Index, vCall.Step);
+                        }
+                    }
+                }
 
-                int getValue(int index, int step)
+                IResult getValue(int index, int step)
                 {
                     if (step == 0)
                     {
-                        return data[index];
+                        return new ResultValue(data[index]);
                     }
 
                     if (valueCache.TryGetValue(step, out var v))
@@ -30,13 +85,18 @@ namespace AoC.Year2020.Day23
                     }
                     else
                     {
+                        //Console.WriteLine($"Building value for {step}");
+                        //if (step >=4)
+                        //{
+
+                        //}
                         var v2 = _getValueFunction(step);
                         valueCache[step] = v2;
                         return v2(index);
                     }
                 }
 
-                int getIndex(int value, int step)
+                IResult getIndex(int value, int step)
                 {
                     if (indexCache.TryGetValue(step, out var v))
                     {
@@ -44,6 +104,7 @@ namespace AoC.Year2020.Day23
                     }
                     else
                     {
+                        //Console.WriteLine($"Building index for {step}");
                         var v2 = _getIndexFunction(step);
                         //if (v2 < 0 || v2 >= data.Count)
                         //{
@@ -54,100 +115,105 @@ namespace AoC.Year2020.Day23
                     }
                 }
 
-                Func<int, int> _getValueFunction(int step)
+                Func<int, IResult> _getValueFunction(int step)
                 {
-                    var pCurrent = getValue(0, step - 1);
+                    if (step == 0)
+                    {
+                        return (index) => new ResultValue(data[index]);
+                    }
+
+                    var pCurrent = evaluate(getValue(0, step - 1));
 
                     var pDestination = (pCurrent - 2 + data.Count) % data.Count + 1;
-                    var pDestinationIx = getIndex(pDestination, step - 1);
+                    var pDestinationIx = evaluate(getIndex(pDestination, step - 1));
                     while (pDestinationIx == 1 || pDestinationIx == 2 || pDestinationIx == 3)
                     {
                         pDestination = (pDestination - 2 + data.Count) % data.Count + 1;
-                        pDestinationIx = getIndex(pDestination, step - 1);
+                        pDestinationIx = evaluate(getIndex(pDestination, step - 1));
                     }
 
                     return (index) =>
                     {
                         if (index == data.Count - 1)
                         {
-                            return pCurrent;
+                            return new ResultValue(pCurrent);
                         }
                         if (index < pDestinationIx - 4)
                         {
-                            return getValue(index + 4, step - 1);
+                            return new GetValueCall(index + 4, step - 1);
                         }
                         if (index == pDestinationIx - 4)
                         {
-                            return pDestination;
+                            return new ResultValue(pDestination);
                         }
                         if (index == pDestinationIx - 3)
                         {
-                            return getValue(1, step - 1);
+                            return new GetValueCall(1, step - 1);
                         }
                         if (index == pDestinationIx - 2)
                         {
-                            return getValue(2, step - 1);
+                            return new GetValueCall(2, step - 1);
                         }
                         if (index == pDestinationIx - 1)
                         {
-                            return getValue(3, step - 1);
+                            return new GetValueCall(3, step - 1);
                         }
                         if (index >= pDestinationIx)
                         {
-                            return getValue(index + 1, step - 1);
+                            return new GetValueCall(index + 1, step - 1);
                         }
                         throw new InvalidOperationException($"Couldn't determine index to get value for {index} w/ {pDestinationIx}");
                     };
                 }
 
-                Func<int, int> _getIndexFunction(int step)
+                Func<int, IResult> _getIndexFunction(int step)
                 {
                     if (step == 0)
                     {
-                        return (value) => data.IndexOf(value);
+                        return (value) => new ResultValue(data.IndexOf(value));
                     }
 
-                    var pCurrent = getValue(0, step - 1);
+                    var pCurrent = evaluate(getValue(0, step - 1));
 
                     var pDestination = (pCurrent - 2 + data.Count) % data.Count + 1;
-                    var pDestinationIx = getIndex(pDestination, step - 1);
+                    var pDestinationIx = evaluate(getIndex(pDestination, step - 1));
                     while (pDestinationIx == 1 || pDestinationIx == 2 || pDestinationIx == 3)
                     {
                         pDestination = (pDestination - 2 + data.Count) % data.Count + 1;
-                        pDestinationIx = getIndex(pDestination, step - 1);
+                        pDestinationIx = evaluate(getIndex(pDestination, step - 1));
                     }
 
                     return (value) =>
                     {
-                        var pIx = getIndex(value, step - 1);
+                        var pIx = evaluate(getIndex(value, step - 1));
                         if (pIx == 0)
                         {
-                            return data.Count - 1;
+                            return new ResultValue(data.Count - 1);
                         }
                         if (pIx == pDestinationIx)
                         {
-                            return pDestinationIx - 4;
+                            return new ResultValue(pDestinationIx - 4);
                         }
                         if (pIx == 1)
                         {
-                            return pDestinationIx - 3;
+                            return new ResultValue(pDestinationIx - 3);
                         }
                         if (pIx == 2)
                         {
-                            return pDestinationIx - 2;
+                            return new ResultValue(pDestinationIx - 2);
                         }
                         if (pIx == 3)
                         {
-                            return pDestinationIx - 1;
+                            return new ResultValue(pDestinationIx - 1);
                         }
 
                         if (pIx < pDestinationIx)
                         {
-                            return pIx - 4;
+                            return new ResultValue(pIx - 4);
                         }
                         if (pIx > pDestinationIx)
                         {
-                            return pIx - 1;
+                            return new ResultValue(pIx - 1);
                         }
 
                         throw new InvalidOperationException($"Couldn't determine index for {value} w/ {pDestinationIx}");
@@ -202,14 +268,26 @@ namespace AoC.Year2020.Day23
                 // not 32674859
                 // is 24798635
 
+                Console.WriteLine($"Running for {count} rounds with {padding} numbers");
+
+                for(var t = 0; t < count; t++)
+                {
+                    if (t % 1000 == 0)
+                    {
+                        Console.WriteLine($"Preloading {t}");
+                    }
+                    getValue(0, t);
+                    getIndex(0, t);
+                }
+
                 Console.WriteLine($"After {count} rounds with {padding} numbers");
 
-                var ix = getIndex(1, count);
+                var ix = evaluate(getIndex(1, count));
                 Console.WriteLine($"1 is at index {ix}");
 
-                var v1 = getValue((ix + 1) % padding, count);
+                var v1 = evaluate(getValue((ix + 1) % padding, count));
                 Console.WriteLine($"Followed by {v1}");
-                var v2 = getValue((ix + 2) % padding, count);
+                var v2 = evaluate(getValue((ix + 2) % padding, count));
                 Console.WriteLine($"Followed by {v2}");
 
                 var answer = v1 * v2;
@@ -224,6 +302,11 @@ namespace AoC.Year2020.Day23
 
         public override void Run()
         {
+            RunScenario("initial", @"389125467", 9, 100);
+            //return;
+            RunScenario("part1", @"362981754", 9, 100);
+
+
             RunScenario("initial", @"389125467", 1000000, 10000);
 
             //RunScenario("initial", @"389125467", 9, 100);

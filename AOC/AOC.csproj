@@ -11,6 +11,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Year2015\**" />
+    <Compile Remove="Year2016\**" />
+    <Compile Remove="Year2019\**" />
+    <Compile Remove="Year2020\**" />
+    <EmbeddedResource Remove="Year2015\**" />
+    <EmbeddedResource Remove="Year2016\**" />
+    <EmbeddedResource Remove="Year2019\**" />
+    <EmbeddedResource Remove="Year2020\**" />
+    <None Remove="Year2015\**" />
+    <None Remove="Year2016\**" />
+    <None Remove="Year2019\**" />
+    <None Remove="Year2020\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Combinatorics" Version="1.1.0.19" />
     <PackageReference Include="MathSharp" Version="2.0.0-pre" />
     <PackageReference Include="OptimizedPriorityQueue" Version="4.2.0" />

@@ -19,6 +19,7 @@ namespace AOC.Year2022.Day14
             // int[][] + ValueTuple<int, int> ran in 0.6s
             // InfiniteDictionary + PointInt3D ran in 2.3s
             // InfiniteDictionary + ValueTuple<int,int> ran in 1s
+            // int[][] + ValueTuple<int,int> w/ extension methods ran in 0.6s
             RunScenario(title, () =>
             {
                 var lines = input.Replace("\r\n", "\n").Split("\n", StringSplitOptions.RemoveEmptyEntries);
@@ -40,7 +41,7 @@ namespace AOC.Year2022.Day14
                     (1, 1),
                 };
 
-                var map = new InfiniteDictionary<(int x, int y), char>(Air);
+                var map = Enumerable.Range(0, maxY + 2).Select(i => Enumerable.Range(0, maxX).Select(ii => Air).ToArray()).ToArray();
 
                 foreach (var structure in structures)
                 {
@@ -49,18 +50,18 @@ namespace AOC.Year2022.Day14
                     {
                         do
                         {
-                            map[last] = Rock;
+                            map.Set(last, Rock);
 
                             last = last.MoveOneCloserPreferDiagonal(next);
                         }
                         while (last != next);
                         last = next;
                     }
-                    map[last] = Rock;
+                    map.Set(last, Rock);
                 }
                 for (var x =0; x < maxX; x++)
                 {
-                    map[(x, y: maxY)] = Rock;
+                    map.Set((x, y: maxY), Rock);
                 }
 
                 var sandIn = (x: 500, y: 0);
@@ -71,14 +72,14 @@ namespace AOC.Year2022.Day14
                     foreach (var place in places)
                     {
                         var t = start.Add(place);
-                        if (map[t] == Air)
+                        if (map.Get(t) == Air)
                         {
                             start = t;
                             goto restart;
                         }
                     }
                     // couldn't move it down, so it goes here
-                    map[start] = Sand;
+                    map.Set(start, Sand);
                     return true;
                 }
 
@@ -86,7 +87,7 @@ namespace AOC.Year2022.Day14
                 while (PlaceSand(sandIn))
                 {
                     placed++;
-                    if (map[sandIn] == Sand)
+                    if (map.Get(sandIn) == Sand)
                     {
                         break;
                     }
@@ -97,7 +98,7 @@ namespace AOC.Year2022.Day14
                 {
                     for (var x = minX; x < maxX; x++)
                     {
-                        sb.Append(map[(x, y)]);
+                        sb.Append(map.Get((x, y)));
                     }
                     sb.AppendLine();
                 }

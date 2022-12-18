@@ -30,5 +30,14 @@ namespace AOC.Utilities
             return v1.Add(v2.Subtract(v1).Sign());
         }
 
+        public static T Get<T>(this T[][] map, ValueTuple<int, int> coord)
+        {
+            return map[coord.Item2][coord.Item1];
+        }
+
+        public static void Set<T>(this T[][] map, ValueTuple<int, int> coord, T value)
+        {
+            map[coord.Item2][coord.Item1] = value;
+        }
     }
 }

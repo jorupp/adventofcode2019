@@ -7,8 +7,8 @@ namespace AOC
     {
         static void Main(string[] args)
         {
-            new Year2022.Day9.Part1().Run();
-            new Year2022.Day9.Part2().Run();
+            new Year2022.Day10.Part1().Run();
+            new Year2022.Day10.Part2().Run();
 
             if (Debugger.IsAttached)
             {

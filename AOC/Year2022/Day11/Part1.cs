@@ -10,7 +10,7 @@ namespace AOC.Year2022.Day11
     public class Part1 : BasePart
     {
         private const bool debug = false;
-        // 11:30:15 -> 12:17:25
+        // 11:30:15 -> 12:17:25, time: 47m10s, 100 @ 13m07s
         protected void RunScenario(string title, Monkey[] monkeys)
         {
             RunScenario(title, () =>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AOC.Utilities
 {
-    public static class TupleExtensions
+    public static class TupleExtensionsIntInt
     {
         public static ValueTuple<int, int> Add(this ValueTuple<int, int> v1, ValueTuple<int, int> v2)
         {
@@ -19,7 +19,7 @@ namespace AOC.Utilities
 
         public static ValueTuple<int, int> Abs(this ValueTuple<int, int> v)
         {
-            return new ValueTuple<int, int>(Math.Abs(v.Item1), Math.Abs(v.Item1));
+            return new ValueTuple<int, int>(Math.Abs(v.Item1), Math.Abs(v.Item2));
         }
         public static ValueTuple<int, int> Sign(this ValueTuple<int, int> v)
         {

@@ -74,6 +74,11 @@ namespace AoC.GraphSolver
                     Console.WriteLine($"New best estimated cost: {bestEstimatedCost} - {work.Description}");
                 }
 
+                if (work.EstimatedCost.CompareTo(work.CurrentCost) < 0)
+                {
+                    throw new InvalidOperationException("EstimatedCost must include CurrentCost");
+                }
+
 
                 evaluateNode(work);
                 evaluated.Add(work.Key);

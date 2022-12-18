@@ -16,28 +16,31 @@ namespace AOC.Year2022.Day14
         // 12:47:20 - 1:10:45, time: 23m25s, 100 @ 13m54s
         protected void RunScenario(string title, string input)
         {
+            // int[][] + ValueTuple<int, int> ran in 0.6s
+            // InfiniteDictionary + PointInt3D ran in 2.3s
+            // InfiniteDictionary + ValueTuple<int,int> ran in 1s
             RunScenario(title, () =>
             {
                 var lines = input.Replace("\r\n", "\n").Split("\n", StringSplitOptions.RemoveEmptyEntries);
-                var structures = lines.Select(line => line.Split(" -> ").Select(i => i.Split(",").Select(int.Parse).ToArray()).Select(i => new PointInt3D(i[0], i[1])).ToArray()).ToArray();
+                var structures = lines.Select(line => line.Split(" -> ").Select(i => i.Split(",").Select(int.Parse).ToArray()).Select(i => (x: i[0], y: i[1])).ToArray()).ToArray();
 
-                var maxY = structures.SelectMany(i => i).Max(i => i.Y) + 2;
-                var minX = structures.SelectMany(i => i).Min(i => i.X) - maxY - 2;
-                var maxX = structures.SelectMany(i => i).Max(i => i.X) + maxY + 2;
+                var maxY = structures.SelectMany(i => i).Max(i => i.y) + 2;
+                var minX = structures.SelectMany(i => i).Min(i => i.x) - maxY - 2;
+                var maxX = structures.SelectMany(i => i).Max(i => i.x) + maxY + 2;
 
                 if (minX < 0)
                 {
                     throw new NotImplementedException();
                 }
 
-                var places = new List<PointInt3D>
+                var places = new List<(int x, int y)>
                 {
-                    new PointInt3D(0, 1),
-                    new PointInt3D(-1, 1),
-                    new PointInt3D(1, 1),
+                    (0, 1),
+                    (-1, 1),
+                    (1, 1),
                 };
 
-                var map = new InfiniteDictionary<PointInt3D, char>(Air);
+                var map = new InfiniteDictionary<(int x, int y), char>(Air);
 
                 foreach (var structure in structures)
                 {
@@ -57,17 +60,17 @@ namespace AOC.Year2022.Day14
                 }
                 for (var x =0; x < maxX; x++)
                 {
-                    map[new PointInt3D(x, maxY)] = Rock;
+                    map[(x, y: maxY)] = Rock;
                 }
 
-                var sandIn = new PointInt3D(500, 0);
+                var sandIn = (x: 500, y: 0);
 
-                bool PlaceSand(PointInt3D start)
+                bool PlaceSand((int x, int y) start)
                 {
                     restart:
                     foreach (var place in places)
                     {
-                        var t = start + place;
+                        var t = start.Add(place);
                         if (map[t] == Air)
                         {
                             start = t;
@@ -94,7 +97,7 @@ namespace AOC.Year2022.Day14
                 {
                     for (var x = minX; x < maxX; x++)
                     {
-                        sb.Append(map[new PointInt3D(x, y)]);
+                        sb.Append(map[(x, y)]);
                     }
                     sb.AppendLine();
                 }

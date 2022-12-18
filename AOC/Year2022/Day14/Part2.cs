@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AoC;
+using AOC.Utilities;
 
 namespace AOC.Year2022.Day14
 {
@@ -18,25 +19,25 @@ namespace AOC.Year2022.Day14
             RunScenario(title, () =>
             {
                 var lines = input.Replace("\r\n", "\n").Split("\n", StringSplitOptions.RemoveEmptyEntries);
-                var structures = lines.Select(line => line.Split(" -> ").Select(i => i.Split(",").Select(int.Parse).ToArray()).Select(i => (x: i[0], y: i[1])).ToArray()).ToArray();
+                var structures = lines.Select(line => line.Split(" -> ").Select(i => i.Split(",").Select(int.Parse).ToArray()).Select(i => new PointInt3D(i[0], i[1])).ToArray()).ToArray();
 
-                var maxY = structures.SelectMany(i => i).Max(i => i.y) + 2;
-                var minX = structures.SelectMany(i => i).Min(i => i.x) - maxY - 2;
-                var maxX = structures.SelectMany(i => i).Max(i => i.x) + maxY + 2;
+                var maxY = structures.SelectMany(i => i).Max(i => i.Y) + 2;
+                var minX = structures.SelectMany(i => i).Min(i => i.X) - maxY - 2;
+                var maxX = structures.SelectMany(i => i).Max(i => i.X) + maxY + 2;
 
                 if (minX < 0)
                 {
                     throw new NotImplementedException();
                 }
 
-                var places = new List<(int x, int y)>
+                var places = new List<PointInt3D>
                 {
-                    (0, 1),
-                    (-1, 1),
-                    (1, 1),
+                    new PointInt3D(0, 1),
+                    new PointInt3D(-1, 1),
+                    new PointInt3D(1, 1),
                 };
 
-                var map = Enumerable.Range(0, maxY + 2).Select(i => Enumerable.Range(0, maxX).Select(ii => Air).ToArray()).ToArray();
+                var map = new InfiniteDictionary<PointInt3D, char>(Air);
 
                 foreach (var structure in structures)
                 {
@@ -45,43 +46,44 @@ namespace AOC.Year2022.Day14
                     {
                         do
                         {
-                            map[last.y][last.x] = Rock;
+                            map[last] = Rock;
 
-                            // this can't be diagonal, so it's fine
-                            last = (x: last.x + Math.Sign(next.x - last.x), last.y + Math.Sign(next.y - last.y));
+                            last = last.MoveOneCloserPreferDiagonal(next);
                         }
                         while (last != next);
                         last = next;
                     }
-                    map[last.y][last.x] = Rock;
+                    map[last] = Rock;
                 }
-                for(var x =0; x < maxX; x++)
+                for (var x =0; x < maxX; x++)
                 {
-                    map[maxY][x] = Rock;
+                    map[new PointInt3D(x, maxY)] = Rock;
                 }
 
-                bool PlaceSand((int x, int y) start)
+                var sandIn = new PointInt3D(500, 0);
+
+                bool PlaceSand(PointInt3D start)
                 {
                     restart:
                     foreach (var place in places)
                     {
-                        var t = (x: start.x + place.x, y: start.y + place.y);
-                        if (map[t.y][t.x] == Air)
+                        var t = start + place;
+                        if (map[t] == Air)
                         {
                             start = t;
                             goto restart;
                         }
                     }
                     // couldn't move it down, so it goes here
-                    map[start.y][start.x] = Sand;
+                    map[start] = Sand;
                     return true;
                 }
 
                 var placed = 0;
-                while (PlaceSand((500, 0)))
+                while (PlaceSand(sandIn))
                 {
                     placed++;
-                    if (map[0][500] == Sand)
+                    if (map[sandIn] == Sand)
                     {
                         break;
                     }
@@ -92,7 +94,7 @@ namespace AOC.Year2022.Day14
                 {
                     for (var x = minX; x < maxX; x++)
                     {
-                        sb.Append(map[y][x]);
+                        sb.Append(map[new PointInt3D(x, y)]);
                     }
                     sb.AppendLine();
                 }
